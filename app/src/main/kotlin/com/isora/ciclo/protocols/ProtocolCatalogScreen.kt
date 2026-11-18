@@ -27,6 +27,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.pluralStringResource
@@ -178,6 +179,7 @@ private fun ProtocolFormDialog(
     onCancel: () -> Unit,
 ) {
     val form = state.form
+    val focus = LocalFocusManager.current
 
     @Composable
     fun field(label: Int, value: String, error: Int?, onValue: (String) -> Unit) = OutlinedTextField(
@@ -232,7 +234,7 @@ private fun ProtocolFormDialog(
                 ) { onChange(form.copy(cycles = it)) }
             }
         },
-        confirmButton = { TextButton(onClick = onSave) { Text(stringResource(R.string.protocol_form_save)) } },
+        confirmButton = { TextButton(onClick = { focus.clearFocus(); onSave() }) { Text(stringResource(R.string.protocol_form_save)) } },
         dismissButton = { TextButton(onClick = onCancel) { Text(stringResource(R.string.protocol_form_cancel)) } },
     )
 }
