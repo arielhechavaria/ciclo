@@ -1,7 +1,7 @@
 # Ciclo MVP (Phase 1)
 
 Objective: offline Android app that tracks each patient's chemotherapy progress, with the timeline view (prototype E) as the home screen.
-Branch: `feat/ciclo-mvp` (repo not initialized yet; T1 creates it) · Delivery: `ask-on-risk`, chain strategy asked before the first commit (forecast ~5,000 authored lines) · Test runner: JUnit 5 for the pure Kotlin `domain` module, JUnit 4 + Robolectric + Compose UI tests for `app`.
+Repo: https://github.com/arielhechavaria/isora-medical-app (private) · Branch: `feat/ciclo-mvp` · Build and tests run only in GitHub Actions (no local JDK or SDK) · Delivery: `ask-on-risk`, chain strategy asked before the first commit (forecast ~5,000 authored lines) · Test runner: JUnit 5 for the pure Kotlin `domain` module, JUnit 4 + Robolectric + Compose UI tests for `app`.
 
 ## Specs
 
@@ -33,7 +33,7 @@ Out of Phase 1 (Phase 2, **Decision (assumed)** for the open questions): photo o
 
 | ID | Specs | Task | Route | Model | Risk | Status | Commit |
 |----|-------|------|-------|-------|------|--------|--------|
-| T1 | S1, S2 | Scaffold: `git init`, Gradle project with `domain` and `app` modules, Compose, Room, test runners, feature packages | inline | sonnet | 5 (dependencies) | pending | — |
+| T1 | S1, S2 | Scaffold: `git init`, Gradle project with `domain` and `app` modules, Compose, Room, test runners, feature packages | inline | sonnet | 5 (dependencies) | done, CI run 44328819078 green | e2efa22 |
 | T2 | S3, S6, S7, S9, S10 | Schedule engine in `domain`: generate sessions and end date, postpone with cascade, finish rules, until-progression, TDD with the S7 example | inline | opus | 6 | pending | — |
 | T3 | S4, S5, S6, S8 | Persistence: Room entities, DAOs, repository adapters for domain ports, seed of the 8 protocols, protocol snapshot on assignment | inline | opus | 1 (stored format) | pending | — |
 | T4 | S4 | Protocol catalog UI: list, add, edit, archive | inline | sonnet | none | pending | — |
@@ -57,3 +57,5 @@ Order: T1 → T2 → T3 → (T4, T5, T6, T7, T12, T13, T8 in sequence) → T9 �
 - **L4 (2026-11-18):** Engram mirror `odd/ciclo-mvp/tasks` is pending: auto mode could not check the `mem_save` call because a hook changes its input. Resync when available.
 - **L5 (2026-11-18, user, verbatim):** "estoy de acuerdo con el plan pero pasa ala fase 1.. todas las vistas del prototipo e". Rewrote S11 into S11a-S11c (Semana, Mes, Línea all in Phase 1), removed them from Phase 2, added T12 and T13. Forecast rises to ~6,000 authored lines.
 - **L6 (2026-11-18):** Environment check: no `java`, no Android SDK (`ANDROID_HOME` unset). T1 is blocked until JDK 17 and the Android SDK are installed.
+- **L7 (2026-11-18, user, verbatim):** "ienes que crear un repo en github...la compilacion la haremos usando githu actions entiendes?" Created private repo `arielhechavaria/isora-medical-app`, `main` holds docs and plan (be111a8). Build config reuses the proven setup of the user's `rodrigo` app: AGP 8.5.2, Kotlin 1.9.24, Compose compiler 1.5.14, Gradle 8.7 via `setup-gradle` (no wrapper). RED/GREEN evidence for later tasks is observed in CI runs: push the failing test first, then the fix.
+- **L8 (2026-11-18):** T1 done. CI run 44328819078: unit tests and `assembleDebug` succeeded, APK uploaded as `ciclo-debug-apk`. No separate verifier: the CI run executed the full build. Next: T2 schedule engine.
