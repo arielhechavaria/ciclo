@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import com.isora.ciclo.patients.PatientDao
 import com.isora.ciclo.patients.PatientEntity
 import com.isora.ciclo.protocols.ProtocolDao
@@ -24,7 +25,12 @@ abstract class CicloDatabase : RoomDatabase() {
     abstract fun treatmentDao(): TreatmentDao
 
     companion object {
-        fun open(context: Context): CicloDatabase =
-            Room.databaseBuilder(context.applicationContext, CicloDatabase::class.java, "ciclo.db").build()
+        /** Opens the on-disk database encrypted with SQLCipher; [passphrase] comes from the Keystore-wrapped key. */
+        fun open(context: Context, passphrase: ByteArray): CicloDatabase {
+            System.loadLibrary("sqlcipher")
+            return Room.databaseBuilder(context.applicationContext, CicloDatabase::class.java, "ciclo.db")
+                .openHelperFactory(SupportOpenHelperFactory(passphrase))
+                .build()
+        }
     }
 }
