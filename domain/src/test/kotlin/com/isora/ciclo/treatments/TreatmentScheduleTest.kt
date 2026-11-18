@@ -173,6 +173,18 @@ class TreatmentScheduleTest {
             assertEquals(date("2026-11-24"), c2.postponedFrom)
             assertEquals(date("2027-01-29"), twice.endDate)
         }
+
+        @Test
+        fun `postponing an earlier session afterwards still moves a later postponed session`() {
+            val treatment = treatment
+                .postpone(SessionRef(3, 1), date("2026-12-20"))
+                .postpone(SessionRef(2, 1), date("2026-12-01"))
+
+            val c3 = treatment.sessions().toList()[2]
+            assertEquals(date("2026-12-27"), c3.date)
+            assertEquals(date("2026-12-22"), c3.postponedFrom)
+            assertEquals(date("2027-02-07"), treatment.endDate)
+        }
     }
 
     @Nested
