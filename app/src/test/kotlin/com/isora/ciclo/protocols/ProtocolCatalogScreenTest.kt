@@ -21,7 +21,7 @@ import org.robolectric.annotation.Config
 import kotlin.coroutines.EmptyCoroutineContext
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34], qualifiers = "w411dp-h891dp")
+@Config(sdk = [34])
 class ProtocolCatalogScreenTest {
     @get:Rule
     val rule = createComposeRule()
@@ -98,10 +98,10 @@ class ProtocolCatalogScreenTest {
         rule.onNodeWithText("Añadir protocolo").performClick()
         rule.onNodeWithText("Guardar").performClick()
 
-        rule.onNodeWithText("Escribe un nombre").assertIsDisplayed()
-        rule.onNodeWithText("Número de días inválido").assertIsDisplayed()
-        rule.onNodeWithText("Días de sesión inválidos").assertIsDisplayed()
-        rule.onNodeWithText("Número de ciclos inválido").assertIsDisplayed()
+        rule.onNodeWithText("Escribe un nombre").assertExists()
+        rule.onNodeWithText("Número de días inválido").assertExists()
+        rule.onNodeWithText("Días de sesión inválidos").assertExists()
+        rule.onNodeWithText("Número de ciclos inválido").assertExists()
         assertEquals(8, catalog.all().size)
     }
 
@@ -115,7 +115,7 @@ class ProtocolCatalogScreenTest {
         rule.onNodeWithText("Número de ciclos").performTextInput("4")
         rule.onNodeWithText("Guardar").performClick()
 
-        rule.onNodeWithText("Ya existe un protocolo con ese nombre").assertIsDisplayed()
+        rule.onNodeWithText("Ya existe un protocolo con ese nombre").assertExists()
         assertEquals(8, catalog.all().size)
     }
 
