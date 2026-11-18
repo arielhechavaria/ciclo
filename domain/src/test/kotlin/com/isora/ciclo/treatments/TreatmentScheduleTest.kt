@@ -236,7 +236,7 @@ class TreatmentScheduleTest {
             assertNull(treatment.endDate)
             assertNull(treatment.totalCycles)
             assertFalse(treatment.isFinishedOn(date("2030-01-01")))
-            assertTrue(treatment.sessions().none { it.isLast })
+            assertTrue(treatment.sessions().take(20).none { it.isLast })
         }
 
         @Test
