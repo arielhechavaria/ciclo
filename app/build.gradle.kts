@@ -51,6 +51,8 @@ android {
     }
     testOptions {
         unitTests.isIncludeAndroidResources = true
+        // Robolectric with Compose needs more than the 512 MB default heap of the test JVM.
+        unitTests.all { it.maxHeapSize = "2g" }
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.14"
