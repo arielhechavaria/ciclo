@@ -25,15 +25,15 @@ data class ProtocolForm(
         val length = positiveInt(cycleLength)
         if (length == null) errors += ProtocolFormError.CYCLE_LENGTH_INVALID
 
+        // Without a valid cycle length the days can only be checked as a list; the "inside the cycle"
+        // rule waits until the length is fixed, so one mistake is not reported twice.
         val days = parseDays(sessionDays)
-        val regimen = if (length != null && days != null) {
-            runCatching { Regimen(length, days) }.getOrNull()
-        } else {
-            null
-        }
-        if (regimen == null) errors += ProtocolFormError.SESSION_DAYS_INVALID
+        val regimen = if (length != null && days != null) runCatching { Regimen(length, days) }.getOrNull() else null
+        if (days == null || (length != null && regimen == null)) errors += ProtocolFormError.SESSION_DAYS_INVALID
 
-        val count = positiveInt(cycles)?.let { if (untilProgression) CycleCount.UntilProgression(it) else CycleCount.Fixed(it) }
+        val count = positiveInt(cycles)?.let {
+            if (untilProgression) CycleCount.UntilProgression(it) else CycleCount.Fixed(it)
+        }
         if (count == null) errors += ProtocolFormError.CYCLES_INVALID
 
         if (errors.isNotEmpty()) return ProtocolFormResult.Invalid(errors)
