@@ -54,6 +54,8 @@ class ProtocolCatalogScreenTest {
         rule.onNode(hasTestTag("protocol-AC")).assertDoesNotExist()
 
         rule.onNodeWithText("Mostrar archivados").performClick()
+        rule.onNode(hasTestTag("protocol-AC")).assertExists()
+        rule.onNodeWithText("Archivado").assertExists()
         rule.onNode(inRow("AC", "Restaurar")).performClick()
         rule.onNodeWithText("Mostrar archivados").performClick()
         rule.onNode(hasTestTag("protocol-AC")).assertIsDisplayed()
