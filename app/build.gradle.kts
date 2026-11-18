@@ -11,13 +11,30 @@ android {
         applicationId = "com.isora.ciclo"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "0.1.0"
+        // The release workflow sets these from the git tag and the run number.
+        versionCode = System.getenv("CICLO_VERSION_CODE")?.toInt() ?: 1
+        versionName = System.getenv("CICLO_VERSION_NAME") ?: "0.1.0-dev"
+    }
+
+    // Stable release key so every new APK installs over the previous one.
+    // See scripts/setup-release-signing.sh; CI decodes it from repository secrets.
+    val keystorePath = System.getenv("CICLO_KEYSTORE_PATH")
+    signingConfigs {
+        if (keystorePath != null) {
+            create("release") {
+                storeFile = file(keystorePath)
+                storeType = "pkcs12"
+                storePassword = System.getenv("CICLO_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("CICLO_KEY_ALIAS")
+                keyPassword = System.getenv("CICLO_KEYSTORE_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 
