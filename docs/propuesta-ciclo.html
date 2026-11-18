@@ -1,0 +1,738 @@
+<title>Proyecto Ciclo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one reading column; the treatment-cycle strip (q21d x 4) is the recurring visual motif. */
+:root{
+  --bg:#F2F4F1; --surface:#FFFFFF; --ink:#16262A; --muted:#566769; --line:#D7DED9;
+  --accent:#246B5C; --accent-soft:#DCEBE5;
+  --warn:#A86A12; --warn-soft:#F6E7CC;
+  --alert:#B0433A; --alert-soft:#F5DCD8;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1719; --surface:#172225; --ink:#E6EDEA; --muted:#9AAAA9; --line:#2A3A3D;
+    --accent:#6CC2AC; --accent-soft:#1D3833;
+    --warn:#E8B25A; --warn-soft:#3A2E19;
+    --alert:#F08A7E; --alert-soft:#3D2220;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1719; --surface:#172225; --ink:#E6EDEA; --muted:#9AAAA9; --line:#2A3A3D;
+  --accent:#6CC2AC; --accent-soft:#1D3833;
+  --warn:#E8B25A; --warn-soft:#3A2E19;
+  --alert:#F08A7E; --alert-soft:#3D2220;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:40px 72px;display:flex;flex-direction:column;gap:80px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.1}
+h2{font-size:clamp(1.6rem,3.2vw,2.2rem);font-weight:700;letter-spacing:-.01em}
+h3{font-size:1.15rem;font-weight:700}
+p{margin:0}
+.eyebrow{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.sec{display:flex;flex-direction:column;gap:28px}
+.sec-head{display:flex;flex-direction:column;gap:10px;max-width:65ch}
+.sec-head p{color:var(--muted)}
+
+/* Hero */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:40px;align-items:center}
+.hero-text{display:flex;flex-direction:column;gap:16px;min-width:0}
+.hero h1{font-size:clamp(3.4rem,9vw,6rem);font-weight:800;letter-spacing:-.035em;color:var(--accent)}
+.lede{font-size:1.2rem;max-width:34ch}
+.strip-card{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 22px 18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.strip-card figcaption{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:.9rem}
+.strip-card figcaption b{font-weight:600}
+.tag{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.strip{position:relative;padding-top:30px}
+.strip-track{display:grid;grid-template-columns:repeat(4,1fr);position:relative}
+.seg{display:flex;flex-direction:column;gap:6px;min-width:0}
+.seg .bar{height:12px;background:var(--accent-soft);border-right:2px solid var(--surface);position:relative}
+.seg:first-child .bar{border-radius:6px 0 0 6px}
+.seg:last-child .bar{border-radius:0 6px 6px 0;border-right:0}
+.seg .bar::before{content:"";position:absolute;left:-1px;top:-4px;width:4px;height:20px;border-radius:2px;background:var(--ink)}
+.seg b{font-family:var(--f-mono);font-size:.82rem}
+.seg small{font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
+.progress{position:absolute;left:0;top:30px;height:12px;width:var(--today);background:var(--accent);border-radius:6px 0 0 6px}
+.today{position:absolute;left:var(--today);top:0;height:52px;width:2px;background:var(--warn);transform:translateX(-1px)}
+.today span{position:absolute;top:0;left:6px;font-family:var(--f-mono);font-size:.72rem;color:var(--warn);white-space:nowrap}
+.strip-foot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;border-top:1px solid var(--line);padding-top:14px}
+.strip-foot div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.strip-foot small{font-size:.75rem;color:var(--muted)}
+.strip-foot b{font-family:var(--f-mono);font-size:.95rem}
+.strip-foot .end b{color:var(--accent)}
+
+/* Flow */
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;counter-reset:step}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.step::before{counter-increment:step;content:counter(step);font-family:var(--f-mono);font-size:.8rem;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-weight:600}
+.step p{font-size:.92rem;color:var(--muted)}
+.step.auto{background:var(--accent-soft);border-color:transparent}
+.step.auto::before{background:var(--accent);color:var(--surface)}
+.step.auto p{color:var(--ink)}
+
+/* Calculation example */
+.calc{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 16px;font-size:.95rem}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-weight:500}
+.dates{overflow-x:auto}
+.dates table{border-collapse:collapse;width:100%;min-width:420px;font-family:var(--f-mono);font-size:.88rem;font-variant-numeric:tabular-nums}
+.dates th{text-align:left;font-family:var(--f-body);font-weight:500;font-size:.78rem;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--line)}
+.dates td{padding:9px 8px;border-bottom:1px solid var(--line)}
+.dates tr.late td{background:var(--warn-soft)}
+.dates s{color:var(--muted)}
+.dates .fin td{font-weight:600;color:var(--accent)}
+.note{font-size:.88rem;color:var(--muted)}
+
+/* Catalog and data entry */
+.cat table{min-width:520px}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.entry{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.photo-steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:.94rem}
+.review{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.rv{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;font-size:.9rem;border-bottom:1px solid var(--line)}
+.rv:last-child{border-bottom:0}
+.rv-tag{font-size:.78rem;font-weight:500;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.rv-tag.known{background:var(--accent-soft);color:var(--accent)}
+.rv-tag.new{background:var(--warn-soft);color:var(--warn)}
+
+/* Phases */
+.phases{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.phase{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.phase.core{border:2px solid var(--accent)}
+.phase.opt{background:transparent;border:1.5px dashed var(--line)}
+.phase-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.phase ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:.94rem}
+.phase .tag.warn{background:var(--warn-soft);color:var(--warn)}
+.phase .tag.plain{background:transparent;border:1px solid var(--line);color:var(--muted)}
+
+/* Context */
+.context{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.ctx{border-top:2px solid var(--ink);padding-top:12px;display:flex;flex-direction:column;gap:6px}
+.ctx p{font-size:.92rem;color:var(--muted)}
+.nots{display:flex;flex-wrap:wrap;gap:8px}
+.nots span{font-size:.9rem;padding:6px 12px;border-radius:99px;background:var(--alert-soft);color:var(--alert)}
+
+/* Designs */
+.designs{display:grid;grid-template-columns:minmax(0,1fr);gap:48px 28px;align-items:start}
+@media (min-width:700px){.designs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.design{margin:0;display:flex;flex-direction:column;gap:16px;align-items:center}
+.design figcaption{display:flex;flex-direction:column;gap:6px;width:100%;max-width:310px}
+.design figcaption p{font-size:.92rem;color:var(--muted)}
+.design figcaption .fit{font-size:.88rem;color:var(--ink)}
+.phone{width:300px;max-width:100%;border-radius:40px;padding:10px;background:#111517;box-shadow:0 18px 40px -18px rgba(10,20,22,.45)}
+.scr{border-radius:31px;overflow:hidden;min-height:600px;display:flex;flex-direction:column;font-size:12.5px;line-height:1.35}
+.sb{display:flex;justify-content:space-between;padding:12px 22px 4px;font-family:var(--f-mono);font-size:11px;font-weight:600}
+.grow{flex:1}
+
+/* Design A: Clara */
+.a .scr{--a-bg:#F4F7F6;--a-card:#FFFFFF;--a-ink:#152427;--a-mut:#66777A;--a-acc:#1F7A68;--a-acc-soft:#DDEEE8;--a-amb:#C47F14;--a-amb-soft:#FBEED7;--a-red:#B8473D;--a-red-soft:#F8E1DD;background:var(--a-bg);color:var(--a-ink);font-family:var(--f-body)}
+.a-head{padding:10px 18px 0;display:flex;flex-direction:column;gap:2px}
+.a-head small{color:var(--a-mut)}
+.a-head h4{margin:0;font-family:var(--f-body);font-size:22px;font-weight:600;letter-spacing:-.01em}
+.a-seg{margin:12px 18px 0;display:grid;grid-template-columns:repeat(3,1fr);background:#E6ECEA;border-radius:12px;padding:3px}
+.a-seg span{text-align:center;padding:6px 0;border-radius:9px;color:var(--a-mut);font-weight:500}
+.a-seg .on{background:var(--a-card);color:var(--a-ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.a-alert{margin:14px 18px 0;background:var(--a-amb-soft);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:3px}
+.a-alert small{font-size:10px;letter-spacing:.08em;font-weight:600;color:var(--a-amb)}
+.a-alert b{font-size:15px}
+.a-alert span{color:#6B5426}
+.a-list{padding:6px 18px 12px;display:flex;flex-direction:column;gap:8px}
+.a-day{margin-top:8px;font-size:11px;font-weight:600;color:var(--a-mut);letter-spacing:.04em;text-transform:uppercase}
+.a-item{background:var(--a-card);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:7px}
+.a-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.a-row b{font-size:13.5px;font-weight:600}
+.a-row span{color:var(--a-mut)}
+.a-bar{height:5px;border-radius:3px;background:var(--a-acc-soft);position:relative;overflow:hidden}
+.a-bar::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--p);background:var(--a-acc);border-radius:3px}
+.a-chip{font-size:10.5px;padding:2px 8px;border-radius:99px;background:var(--a-red-soft);color:var(--a-red);font-weight:600;white-space:nowrap}
+.a-item.late .a-bar::after{background:var(--a-red)}
+.a-nav{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #E1E7E5;background:var(--a-card);padding:10px 0 16px;text-align:center;color:var(--a-mut);font-weight:500}
+.a-nav .on{color:var(--a-acc);font-weight:600}
+
+/* Design B: Guardia */
+.b .scr{--b-bg:#0E1315;--b-card:#172024;--b-ink:#E9EFED;--b-mut:#8A9A9A;--b-amb:#F2B544;--b-red:#FF8577;--b-mint:#7FD8BE;--b-line:#263236;background:var(--b-bg);color:var(--b-ink);font-family:var(--f-body)}
+.b-head{padding:12px 18px 0;display:flex;flex-direction:column;gap:4px}
+.b-head .mono{color:var(--b-amb);font-size:11px;letter-spacing:.1em}
+.b-head h4{margin:0;font-family:var(--f-display);font-size:24px;font-weight:700}
+.b-sum{margin:12px 18px 4px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.b-sum div{background:var(--b-card);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:1px}
+.b-sum b{font-family:var(--f-mono);font-size:18px}
+.b-sum span{font-size:10.5px;color:var(--b-mut)}
+.b-sum .w b{color:var(--b-amb)}
+.b-sum .r b{color:var(--b-red)}
+.b-tl{padding:10px 18px 14px 18px;display:flex;flex-direction:column}
+.b-day{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;position:relative;padding-bottom:12px}
+.b-day::before{content:"";position:absolute;left:21px;top:22px;bottom:0;width:1px;background:var(--b-line)}
+.b-day:last-child::before{display:none}
+.b-date{display:flex;flex-direction:column;align-items:center;font-family:var(--f-mono);line-height:1.1}
+.b-date small{font-size:9.5px;color:var(--b-mut);text-transform:uppercase;letter-spacing:.06em}
+.b-date b{font-size:16px}
+.b-day.now .b-date b{color:var(--b-bg);background:var(--b-amb);border-radius:8px;padding:2px 6px}
+.b-items{display:flex;flex-direction:column;gap:6px;min-width:0}
+.b-it{background:var(--b-card);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:3px;border-left:3px solid var(--b-mint)}
+.b-it b{font-size:13px;font-weight:600}
+.b-it span{font-family:var(--f-mono);font-size:10.5px;color:var(--b-mut)}
+.b-it.fin{border-left-color:var(--b-amb)}
+.b-it.late{border-left-color:var(--b-red)}
+.b-flag{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.08em;font-weight:600}
+.b-it.fin .b-flag{color:var(--b-amb)}
+.b-it.late .b-flag{color:var(--b-red)}
+.b-nav{display:flex;justify-content:space-around;padding:10px 0 16px;border-top:1px solid var(--b-line);color:var(--b-mut);font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em}
+.b-nav .on{color:var(--b-amb)}
+
+/* Design C: Tablero */
+.c .scr{--c-bg:#FAFAF7;--c-ink:#1B1A2E;--c-mut:#6E6C80;--c-ind:#4338CA;--c-t1:#E9E6FF;--c-t2:#FFE6D5;--c-t3:#DDF3E8;--c-t4:#DCEBFB;--c-red:#C2410C;--c-red-soft:#FFE1D2;background:var(--c-bg);color:var(--c-ink);font-family:var(--f-body);position:relative}
+.c-head{padding:10px 18px 0;display:flex;justify-content:space-between;align-items:flex-end;gap:8px}
+.c-big{display:flex;flex-direction:column}
+.c-big b{font-family:var(--f-display);font-size:54px;font-weight:800;line-height:.9;letter-spacing:-.04em;color:var(--c-ind)}
+.c-big span{font-size:12px;color:var(--c-mut)}
+.c-pill{font-size:11px;font-weight:600;padding:5px 10px;border-radius:99px;background:var(--c-ink);color:var(--c-bg);white-space:nowrap}
+.c-grid{padding:14px 14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.c-tile{border-radius:20px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.c-tile.wide{grid-column:span 2;flex-direction:row;align-items:center;justify-content:space-between}
+.c-tile b{font-family:var(--f-display);font-size:15px;font-weight:700;line-height:1.1}
+.c-tile span{font-size:11px;color:var(--c-mut)}
+.c-when{font-size:11px;font-weight:600}
+.ring{--rc:var(--c-ind);width:46px;height:46px;border-radius:50%;background:conic-gradient(var(--rc) calc(var(--p) * 1%),rgba(27,26,46,.12) 0);display:grid;place-items:center;flex:none}
+.ring i{width:36px;height:36px;border-radius:50%;background:var(--tile);display:grid;place-items:center;font-style:normal;font-family:var(--f-mono);font-size:10.5px;font-weight:600}
+.c-tile.t1{background:var(--c-t1);--tile:var(--c-t1)}
+.c-tile.t2{background:var(--c-t2);--tile:var(--c-t2)}
+.c-tile.t3{background:var(--c-t3);--tile:var(--c-t3)}
+.c-tile.t4{background:var(--c-t4);--tile:var(--c-t4)}
+.c-tile.late{background:var(--c-red-soft);--tile:var(--c-red-soft)}
+.c-tile.late .ring{--rc:var(--c-red)}
+.c-tile.late .c-when{color:var(--c-red)}
+.c-tile.done .ring{--rc:#15803D}
+.c-fab{position:absolute;right:18px;bottom:20px;width:50px;height:50px;border-radius:16px;background:var(--c-ind);color:#fff;display:grid;place-items:center;font-size:26px;font-weight:500;box-shadow:0 8px 18px -6px rgba(67,56,202,.6)}
+.c-nav{display:flex;gap:18px;padding:10px 18px 18px;color:var(--c-mut);font-weight:500}
+.c-nav .on{color:var(--c-ink);font-weight:700}
+
+/* Design D: Calendario */
+.d .scr{--d-bg:#FFFFFF;--d-ink:#111827;--d-mut:#6B7280;--d-line:#ECEEF3;--d-cell:#F6F7FA;--d-acc:#2459D8;--d-acc-soft:#E6EDFD;--d-amb:#D97706;--d-red:#DC2626;background:var(--d-bg);color:var(--d-ink);font-family:var(--f-body)}
+.d-head{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 8px}
+.d-head h4{margin:0;font-family:var(--f-display);font-size:19px;font-weight:700}
+.d-arrow{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--d-acc-soft);color:var(--d-acc);font-size:16px;font-weight:600}
+.d-wk,.d-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));padding:0 10px}
+.d-wk span{text-align:center;font-size:10px;font-weight:600;color:var(--d-mut);padding:2px 0 5px}
+.d-grid{gap:3px}
+.d-c{height:44px;border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:5px;position:relative;background:var(--d-cell)}
+.d-c.out,.d-c.we{background:transparent}
+.d-c i{font-style:normal;font-size:10.5px;font-weight:600;font-family:var(--f-mono);line-height:1}
+.d-c.we i{color:var(--d-mut);font-weight:400}
+.d-u{position:relative;display:inline-flex;color:var(--d-acc);font-style:normal}
+.d-u svg{width:15px;height:15px;fill:currentColor}
+.d-u b{position:absolute;top:-5px;right:-10px;min-width:14px;height:14px;padding:0 3px;border-radius:7px;background:var(--d-acc);color:#FFFFFF;font-size:9px;font-weight:700;display:grid;place-items:center;line-height:1;font-family:var(--f-mono)}
+.d-c.today{background:var(--d-acc);color:#FFFFFF;box-shadow:0 6px 14px -6px rgba(36,89,216,.7)}
+.d-c.today .d-u{color:#FFFFFF}
+.d-c.today .d-u b{background:#FFFFFF;color:var(--d-acc)}
+.d-c.fin::after,.d-c.late::after{content:"";position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%}
+.d-c.fin::after{background:var(--d-amb)}
+.d-c.late::after{background:var(--d-red)}
+.d-leg{display:flex;gap:12px;flex-wrap:wrap;padding:10px 14px 0;font-size:10.5px;color:var(--d-mut);align-items:center}
+.d-leg span{display:inline-flex;align-items:center;gap:4px}
+.d-leg .d-u svg{width:12px;height:12px}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%}
+.dot.fin{background:var(--d-amb)}
+.dot.late{background:var(--d-red)}
+.d-day{margin:12px 12px 12px;border-top:1px solid var(--d-line);padding-top:10px;display:flex;flex-direction:column;gap:7px}
+.d-day-h{display:flex;justify-content:space-between;align-items:baseline;padding:0 4px}
+.d-day-h b{font-size:14px}
+.d-day-h span{color:var(--d-mut);font-size:11.5px}
+.d-p{display:flex;gap:10px;align-items:center;background:var(--d-cell);border-radius:12px;padding:8px 10px}
+.d-av{width:30px;height:30px;border-radius:50%;background:var(--d-acc-soft);color:var(--d-acc);display:grid;place-items:center;font-size:11px;font-weight:700;flex:none}
+.d-p div{display:flex;flex-direction:column;gap:1px;min-width:0}
+.d-p b{font-size:13px;font-weight:600}
+.d-p span{font-size:11px;color:var(--d-mut)}
+.d-nav{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--d-line);padding:10px 0 16px;text-align:center;color:var(--d-mut);font-weight:500}
+.d-nav .on{color:var(--d-acc);font-weight:600}
+
+/* Design E: timeline (Gantt), uses the tokens of design A */
+.design.span{grid-column:1/-1}
+.g{position:relative;padding:12px 10px 4px;display:flex;flex-direction:column;gap:6px}
+.g-row{display:grid;grid-template-columns:64px 196px;align-items:center}
+.g-name{display:flex;flex-direction:column;min-width:0;padding-right:4px}
+.g-name b{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-name span{font-size:9.5px;color:var(--a-mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-track{position:relative;height:26px;background:repeating-linear-gradient(to right,#DCE4E1 0 1px,transparent 1px 28px)}
+.g-scale .g-track{height:auto;display:grid;grid-template-columns:repeat(7,28px);background:none}
+.g-scale .g-track span{font-family:var(--f-mono);font-size:8.5px;color:var(--a-mut);padding-left:2px;border-left:1px solid #C9D3D0;white-space:nowrap}
+.g-cy{position:absolute;top:7px;height:12px;left:calc(var(--s) * 4px);width:calc(var(--l) * 4px - 1px);background:var(--a-acc-soft);border-radius:3px}
+.g-cy.alt{background:#C3E1D7}
+.g-cy.late{background:repeating-linear-gradient(135deg,var(--a-red-soft) 0 3px,#EFBDB5 3px 6px)}
+.g-se{position:absolute;top:4px;height:18px;left:calc(var(--s) * 4px);width:calc(var(--w, 1) * 4px);background:var(--a-acc);border-radius:2px}
+.g-se.last{background:var(--a-amb)}
+.g-today{position:absolute;top:26px;bottom:0;left:calc(10px + 64px + var(--t) * 4px);width:2px;background:var(--a-ink);opacity:.55}
+.g-today span{position:absolute;bottom:-14px;left:-8px;font-family:var(--f-mono);font-size:9px;font-weight:600}
+.g-leg{display:flex;flex-wrap:wrap;gap:6px 12px;padding:18px 14px 0;font-size:10px;color:var(--a-mut)}
+.g-leg span{display:inline-flex;align-items:center;gap:4px}
+.g-leg i{display:inline-block;border-radius:2px}
+.k-cy{width:14px;height:8px;background:#C3E1D7}
+.k-se{width:4px;height:12px;background:var(--a-acc)}
+.k-last{width:4px;height:12px;background:var(--a-amb)}
+.k-late{width:14px;height:8px;background:repeating-linear-gradient(135deg,var(--a-red-soft) 0 3px,#EFBDB5 3px 6px)}
+.g-hint{padding:8px 14px 10px;font-size:10px;color:var(--a-mut)}
+
+/* Questions */
+.qs{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;counter-reset:q}
+.qs li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start}
+.qs li::before{counter-increment:q;content:counter(q);font-family:var(--f-mono);font-weight:600;color:var(--accent);font-size:1rem;min-width:1.2em}
+.qs small{display:block;color:var(--muted);font-size:.86rem;margin-top:4px}
+footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padding-top:18px}
+
+@media (max-width:900px){
+  .hero{grid-template-columns:minmax(0,1fr)}
+  .flow{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+  .calc{grid-template-columns:minmax(0,1fr)}
+  .phases{grid-template-columns:minmax(0,1fr)}
+  .entry{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:420px){
+  .strip-foot{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="u" viewBox="0 0 24 24"><path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm0 2c-4.4 0-8 2.6-8 6v1h16v-1c0-3.4-3.6-6-8-6Z"/></symbol></svg>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="hero-text">
+      <p class="eyebrow">Propuesta · versión 2, con tu revisión</p>
+      <h1>Ciclo</h1>
+      <p class="lede">Una app personal para saber en qué punto del tratamiento está cada paciente y quién termina esta semana. Funciona en el móvil, sin internet.</p>
+      <p class="note">"Ciclo" es un nombre provisional.</p>
+    </div>
+    <figure class="strip-card">
+      <figcaption><b>Alberto R. · AC cada 21 días × 4</b><span class="tag">Ejemplo</span></figcaption>
+      <div class="strip" style="--today:17.86%">
+        <div class="strip-track">
+          <div class="seg"><div class="bar"></div><b>C1</b><small>3 nov</small></div>
+          <div class="seg"><div class="bar"></div><b>C2</b><small>24 nov</small></div>
+          <div class="seg"><div class="bar"></div><b>C3</b><small>15 dic</small></div>
+          <div class="seg"><div class="bar"></div><b>C4</b><small>5 ene</small></div>
+        </div>
+        <div class="progress"></div>
+        <div class="today"><span>hoy · día 16</span></div>
+      </div>
+      <div class="strip-foot">
+        <div><small>Próxima sesión</small><b>24 nov</b></div>
+        <div><small>Última sesión</small><b>5 ene</b></div>
+        <div class="end"><small>Fin del tratamiento</small><b>26 ene</b></div>
+      </div>
+    </figure>
+  </header>
+
+  <section class="sec">
+    <div class="sec-head">
+      <p class="eyebrow">Tu revisión</p>
+      <h2>Lo que decidiste</h2>
+    </div>
+    <div class="context">
+      <div class="ctx"><h3>Catálogo</h3><p>La base está bien. Siempre se puede gestionar: añadir, editar y archivar protocolos.</p></div>
+      <div class="ctx"><h3>Ciclos y sesiones</h3><p>Un ciclo dura un número de días, por ejemplo 21, y contiene una o más sesiones.</p></div>
+      <div class="ctx"><h3>Aviso semanal</h3><p>Todos los viernes, con lo que viene la semana siguiente.</p></div>
+      <div class="ctx"><h3>Histórico</h3><p>Cuando un paciente termina, sale de la vista principal y pasa al histórico, dentro de la lista de pacientes.</p></div>
+      <div class="ctx"><h3>Lista diaria</h3><p>De momento, con los datos habituales. Se ajustará cuando veamos una lista real.</p></div>
+      <div class="ctx"><h3>Diseños</h3><p>A (Semana) y D (Calendario), más una vista nueva de línea de tiempo.</p></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <p class="eyebrow">Cómo funciona</p>
+      <h2>Tú introduces tres datos. La app calcula el resto.</h2>
+    </div>
+    <div class="flow">
+      <div class="step"><h3>Protocolo</h3><p>Lo eliges del catálogo estándar o creas uno nuevo.</p></div>
+      <div class="step"><h3>Paciente</h3><p>Con un formulario o desde la foto de la lista del día.</p></div>
+      <div class="step"><h3>Inicio</h3><p>Asignas el protocolo y la fecha de la primera sesión.</p></div>
+      <div class="step auto"><h3>Calendario</h3><p>La app genera todas las sesiones y la fecha de fin.</p></div>
+      <div class="step auto"><h3>Aviso del viernes</h3><p>Quién termina y quién tiene sesión la semana siguiente.</p></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <p class="eyebrow">El cálculo, con un ejemplo</p>
+      <h2>Si un ciclo se retrasa, se recalcula todo lo que viene después.</h2>
+      <p>Los retrasos son habituales, por neutropenia o cualquier otra causa. Basta con marcar la sesión como pospuesta y poner la nueva fecha.</p>
+    </div>
+    <div class="calc">
+      <div class="panel">
+        <p class="eyebrow">Lo que introduces</p>
+        <dl class="kv">
+          <dt>Paciente</dt><dd>Alberto R. · HC 10234</dd>
+          <dt>Protocolo</dt><dd>AC · cada 21 días · 4 ciclos · día 1</dd>
+          <dt>Inicio</dt><dd class="mono">mar 3 nov 2026</dd>
+        </dl>
+        <p class="note">Datos de ejemplo. Los protocolos reales los defines tú.</p>
+      </div>
+      <div class="panel">
+        <p class="eyebrow">Lo que calcula la app</p>
+        <div class="dates">
+          <table>
+            <thead><tr><th>Ciclo</th><th>Planificado</th><th>Si C2 se pospone 7 días</th></tr></thead>
+            <tbody>
+              <tr><td>C1</td><td>3 nov</td><td>3 nov</td></tr>
+              <tr class="late"><td>C2</td><td>24 nov</td><td><s>24 nov</s> → 1 dic</td></tr>
+              <tr><td>C3</td><td>15 dic</td><td>22 dic</td></tr>
+              <tr><td>C4</td><td>5 ene</td><td>12 ene</td></tr>
+              <tr class="fin"><td>Fin</td><td>26 ene</td><td>2 feb</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <p class="eyebrow">Catálogo de protocolos</p>
+      <h2>Los protocolos estándar ya vienen cargados.</h2>
+      <p>La app guarda solo la estructura del tratamiento: cuánto dura cada ciclo, cuántos ciclos hay y cuántas sesiones tiene cada ciclo. Las dosis no. El catálogo se gestiona desde la app: puedes añadir, editar o archivar cualquier protocolo.</p>
+    </div>
+    <div class="panel">
+      <div class="dates cat">
+        <table>
+          <thead><tr><th>Protocolo</th><th>Duración del ciclo</th><th>Ciclos por defecto</th><th>Sesiones por ciclo</th></tr></thead>
+          <tbody>
+            <tr><td>AC</td><td>21 días</td><td>4</td><td>1 · D1</td></tr>
+            <tr><td>AC dosis densa</td><td>14 días</td><td>4</td><td>1 · D1</td></tr>
+            <tr><td>Paclitaxel semanal</td><td>7 días</td><td>12</td><td>1 · D1</td></tr>
+            <tr><td>TC</td><td>21 días</td><td>4–6</td><td>1 · D1</td></tr>
+            <tr><td>FOLFOX</td><td>14 días</td><td>12 (adyuvante)</td><td>1 · D1, infusión de 46 h</td></tr>
+            <tr><td>CAPOX</td><td>21 días</td><td>8 (adyuvante)</td><td>1 · D1 + capecitabina oral D1–D14</td></tr>
+            <tr><td>Carboplatino + paclitaxel</td><td>21 días</td><td>6</td><td>1 · D1</td></tr>
+            <tr><td>Gemcitabina + cisplatino</td><td>21 días</td><td>4–6</td><td>2 · D1 y D8</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Lista inicial de ejemplo, para que la revises tú. Faltan los protocolos que uses y no estén aquí, y los propios del MINSAP si se diferencian.</p>
+    </div>
+    <div class="rules">
+      <div class="ctx"><h3>Un ciclo, una o más sesiones</h3><p>Un ciclo de gemcitabina + cisplatino dura 21 días y tiene dos sesiones, el día 1 y el día 8. La app cuenta los dos niveles: "ciclo 1 de 4, sesión 2 de 2".</p></div>
+      <div class="ctx"><h3>Los ciclos cambian según la indicación</h3><p>El catálogo propone el número de ciclos por defecto. Al asignarlo a un paciente puedes cambiarlo: FOLFOX adyuvante son 12 ciclos, pero en enfermedad metastásica puede ser otro número.</p></div>
+      <div class="ctx"><h3>Tratamientos hasta progresión</h3><p>No tienen fecha de fin. La app lo indica así y te avisa para reevaluar cada cierto número de ciclos, el que tú elijas.</p></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <p class="eyebrow">Añadir datos</p>
+      <h2>Dos formas de registrar pacientes: a mano o con una foto.</h2>
+    </div>
+    <div class="entry">
+      <div class="panel">
+        <p class="eyebrow">Formulario</p>
+        <h3>Para pacientes y protocolos</h3>
+        <dl class="kv">
+          <dt>Paciente</dt><dd>Nombre o iniciales · nº de historia clínica · diagnóstico (opcional) · notas</dd>
+          <dt>Tratamiento</dt><dd>Protocolo del catálogo · nº de ciclos · fecha de inicio</dd>
+          <dt>Protocolo nuevo</dt><dd>Nombre · cada cuántos días · nº de ciclos o "hasta progresión" · días de administración</dd>
+        </dl>
+        <p class="note">Siempre está disponible, también para corregir lo que lea la foto.</p>
+      </div>
+      <div class="panel">
+        <p class="eyebrow">Foto de la lista del día</p>
+        <h3>Para la lista de consulta</h3>
+        <ol class="photo-steps">
+          <li><b>Haces la foto</b> de la lista de pacientes del día.</li>
+          <li><b>La app la lee</b> en el propio móvil. La foto no sale del teléfono y se borra al terminar.</li>
+          <li><b>Tú revisas</b> lo que leyó y lo confirmas.</li>
+        </ol>
+        <div class="review">
+          <div class="rv"><span>Dayana C. · HC 10877</span><span class="rv-tag known">Ya registrada · C2 hoy</span></div>
+          <div class="rv"><span>Mercedes L. · HC 09871</span><span class="rv-tag known">Ya registrada · 9 de 12</span></div>
+          <div class="rv"><span>Luis F. · HC 12045</span><span class="rv-tag new">Nueva · completar datos</span></div>
+        </div>
+        <p class="note">Los pacientes nuevos se registran con el formulario ya relleno. A los que ya existen se les aplica su seguimiento. Funciona bien con listas impresas y peor con letra a mano.</p>
+        <p class="note"><b>Datos que se leen, por ahora:</b> nombre, nº de historia clínica, diagnóstico, protocolo, ciclo y sesión. La lista es flexible y se ajustará cuando veamos una real.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <p class="eyebrow">Funciones, por fases</p>
+      <h2>Primero, lo que pediste. Lo demás, después.</h2>
+    </div>
+    <div class="phases">
+      <article class="phase core">
+        <div class="phase-top"><h3>Fase 1</h3><span class="tag">Lo básico</span></div>
+        <ul>
+          <li>Catálogo de protocolos estándar, que se gestiona desde la app.</li>
+          <li>Formularios para pacientes y protocolos.</li>
+          <li>Asignar tratamiento y calcular los ciclos, las sesiones y la fecha de fin.</li>
+          <li>Marcar cada sesión como dada o pospuesta.</li>
+          <li>Vistas <b>Semana</b>, <b>Calendario</b>, <b>Línea de tiempo</b> y <b>Paciente</b>.</li>
+          <li>Aviso cada viernes con la semana siguiente.</li>
+          <li>Al terminar, el paciente pasa al <b>histórico</b>.</li>
+          <li>Bloqueo con PIN o huella.</li>
+        </ul>
+      </article>
+      <article class="phase">
+        <div class="phase-top"><h3>Fase 2</h3><span class="tag warn">Organizar y capturar</span></div>
+        <ul>
+          <li><b>Lista de pacientes</b> con búsqueda y filtro por estado: en tratamiento, pospuesto, terminado, en seguimiento.</li>
+          <li><b>Pacientes por protocolo</b>: quién está con AC, quién con FOLFOX…</li>
+          <li>Foto de la lista del día para registrar pacientes.</li>
+          <li>Seguimiento después del tratamiento, por ejemplo una revisión a los 3 meses, con su propio aviso.</li>
+          <li>Copia de seguridad cifrada en un archivo.</li>
+        </ul>
+      </article>
+      <article class="phase opt">
+        <div class="phase-top"><h3>Fase 3</h3><span class="tag plain">Ideas a decidir</span></div>
+        <ul>
+          <li>Resumen del mes: cuántos empezaron y cuántos terminaron, por protocolo.</li>
+          <li>Exportar listados para informes.</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <p class="eyebrow">Pensada para trabajar en Cuba</p>
+      <h2>No depende de internet ni de los sistemas del hospital.</h2>
+    </div>
+    <div class="context">
+      <div class="ctx"><h3>Sin internet</h3><p>Todo se guarda en el móvil. No hay servidor ni cuenta.</p></div>
+      <div class="ctx"><h3>Android</h3><p>Se instala con un archivo APK, sin pasar por Play Store.</p></div>
+      <div class="ctx"><h3>Sin servicios de Google</h3><p>Los avisos se programan en el propio teléfono.</p></div>
+      <div class="ctx"><h3>Batería</h3><p>Hay que desactivar el ahorro de batería para esta app, o el móvil puede cancelar los avisos.</p></div>
+      <div class="ctx"><h3>Ley 149/2022</h3><p>La ley cubana protege los datos de salud. Por eso la app guarda lo mínimo y se bloquea con PIN.</p></div>
+    </div>
+    <div class="sec-head">
+      <p class="eyebrow">Lo que la app no hará</p>
+    </div>
+    <div class="nots">
+      <span>Calcular dosis</span>
+      <span>Recomendar tratamientos</span>
+      <span>Subir datos a internet</span>
+      <span>Compartir pacientes con otros usuarios</span>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <p class="eyebrow">Diseños elegidos</p>
+      <h2>Tres vistas de la misma agenda.</h2>
+      <p>Elegiste A (Semana) y D (Calendario). E es nueva: todos los pacientes en tratamiento, cada uno con su línea de tiempo. Las tres usan los mismos pacientes de ejemplo y serían pestañas de la misma app.</p>
+    </div>
+    <div class="designs">
+
+      <figure class="design">
+        <div class="phone a"><div class="scr">
+          <div class="sb"><span>9:41</span><span>100%</span></div>
+          <div class="a-head"><small>Miércoles 18 de noviembre</small><h4>Esta semana</h4></div>
+          <div class="a-seg"><span>Hoy</span><span class="on">Semana</span><span>Todos</span></div>
+          <div class="a-alert"><small>TERMINA ESTA SEMANA</small><b>Rosa M.</b><span>AC c/21 días · ciclo 4 de 4 · vie 20</span></div>
+          <div class="a-list">
+            <div class="a-day">Hoy · mié 18</div>
+            <div class="a-item"><div class="a-row"><b>Dayana C.</b><span>C2 de 4</span></div><div class="a-row"><span>TC c/21 días</span></div><div class="a-bar" style="--p:50%"></div></div>
+            <div class="a-item"><div class="a-row"><b>Mercedes L.</b><span>9 de 12</span></div><div class="a-row"><span>Paclitaxel semanal</span></div><div class="a-bar" style="--p:75%"></div></div>
+            <div class="a-day">Jue 19</div>
+            <div class="a-item"><div class="a-row"><b>Ernesto V.</b><span>C11 de 12</span></div><div class="a-row"><span>FOLFOX c/14 días</span></div><div class="a-bar" style="--p:92%"></div></div>
+            <div class="a-day">Pospuesto</div>
+            <div class="a-item late"><div class="a-row"><b>Yoel P.</b><span class="a-chip">lun 16 → lun 23</span></div><div class="a-row"><span>FOLFOX · C6 de 12 · neutropenia</span></div><div class="a-bar" style="--p:50%"></div></div>
+          </div>
+          <div class="grow"></div>
+          <nav class="a-nav"><span class="on">Semana</span><span>Pacientes</span><span>Protocolos</span></nav>
+        </div></div>
+        <figcaption>
+          <h3>A · Clara</h3>
+          <p>Fondo claro, tarjetas suaves y barras de progreso. Lo que termina esta semana aparece destacado arriba.</p>
+          <p class="fit">Para: leer rápido en la consulta, con buena luz.</p>
+        </figcaption>
+      </figure>
+
+      <figure class="design" hidden>
+        <div class="phone b"><div class="scr">
+          <div class="sb"><span>9:41</span><span>100%</span></div>
+          <div class="b-head"><span class="mono">16 — 22 NOV</span><h4>Esta semana</h4></div>
+          <div class="b-sum">
+            <div><b>4</b><span>sesiones</span></div>
+            <div class="w"><b>1</b><span>termina</span></div>
+            <div class="r"><b>1</b><span>pospuesto</span></div>
+          </div>
+          <div class="b-tl">
+            <div class="b-day"><div class="b-date"><small>lun</small><b>16</b></div>
+              <div class="b-items"><div class="b-it late"><span class="b-flag">POSPUESTO → LUN 23</span><b>Yoel P.</b><span>FOLFOX q14d · C6/12</span></div></div></div>
+            <div class="b-day now"><div class="b-date"><small>hoy</small><b>18</b></div>
+              <div class="b-items">
+                <div class="b-it"><b>Dayana C.</b><span>TC q21d · C2/4</span></div>
+                <div class="b-it"><b>Mercedes L.</b><span>Paclitaxel sem · 9/12</span></div>
+              </div></div>
+            <div class="b-day"><div class="b-date"><small>jue</small><b>19</b></div>
+              <div class="b-items"><div class="b-it"><b>Ernesto V.</b><span>FOLFOX q14d · C11/12</span></div></div></div>
+            <div class="b-day"><div class="b-date"><small>vie</small><b>20</b></div>
+              <div class="b-items"><div class="b-it fin"><span class="b-flag">ÚLTIMA SESIÓN</span><b>Rosa M.</b><span>AC q21d · C4/4</span></div></div></div>
+          </div>
+          <div class="grow"></div>
+          <nav class="b-nav"><span class="on">SEMANA</span><span>PACIENTES</span><span>PROTOCOLOS</span></nav>
+        </div></div>
+        <figcaption>
+          <h3>B · Guardia</h3>
+          <p>Modo oscuro con una línea de tiempo por días. Arriba, el resumen de la semana en tres números.</p>
+          <p class="fit">Para: consultarla de noche o con poca luz. Gasta menos batería en pantallas OLED.</p>
+        </figcaption>
+      </figure>
+
+      <figure class="design" hidden>
+        <div class="phone c"><div class="scr">
+          <div class="sb"><span>9:41</span><span>100%</span></div>
+          <div class="c-head">
+            <div class="c-big"><b>4</b><span>sesiones esta semana</span></div>
+            <span class="c-pill">16–22 nov</span>
+          </div>
+          <div class="c-grid">
+            <div class="c-tile t2 done"><div class="ring" style="--p:100"><i>4/4</i></div><b>Rosa M.</b><span>AC c/21 días</span><span class="c-when">Termina vie 20</span></div>
+            <div class="c-tile t1"><div class="ring" style="--p:50"><i>2/4</i></div><b>Dayana C.</b><span>TC c/21 días</span><span class="c-when">Hoy</span></div>
+            <div class="c-tile t3"><div class="ring" style="--p:75"><i>9/12</i></div><b>Mercedes L.</b><span>Paclitaxel semanal</span><span class="c-when">Hoy</span></div>
+            <div class="c-tile t4"><div class="ring" style="--p:92"><i>11/12</i></div><b>Ernesto V.</b><span>FOLFOX c/14 días</span><span class="c-when">Jue 19</span></div>
+            <div class="c-tile wide late"><div><b>Yoel P.</b><br><span>FOLFOX · neutropenia</span><br><span class="c-when">Pospuesto al lun 23</span></div><div class="ring" style="--p:50"><i>6/12</i></div></div>
+          </div>
+          <div class="grow"></div>
+          <nav class="c-nav"><span class="on">Semana</span><span>Pacientes</span><span>Protocolos</span></nav>
+          <div class="c-fab" aria-hidden="true">+</div>
+        </div></div>
+        <figcaption>
+          <h3>C · Tablero</h3>
+          <p>Un bloque de color por paciente, con un anillo que muestra cuántos ciclos lleva. Más visual, menos texto.</p>
+          <p class="fit">Para: ver de un vistazo cuánto le falta a cada paciente.</p>
+        </figcaption>
+      </figure>
+
+      <figure class="design">
+        <div class="phone d"><div class="scr">
+          <div class="sb"><span>9:41</span><span>100%</span></div>
+          <div class="d-head"><span class="d-arrow">‹</span><h4>Noviembre 2026</h4><span class="d-arrow">›</span></div>
+          <div class="d-wk"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+          <div class="d-grid">
+            <span class="d-c out"></span><span class="d-c out"></span><span class="d-c out"></span><span class="d-c out"></span><span class="d-c out"></span><span class="d-c out"></span>
+            <span class="d-c we"><i>1</i></span>
+            <span class="d-c"><i>2</i><em class="d-u"><svg><use href="#u"/></svg><b>2</b></em></span>
+            <span class="d-c"><i>3</i><em class="d-u"><svg><use href="#u"/></svg><b>1</b></em></span>
+            <span class="d-c"><i>4</i><em class="d-u"><svg><use href="#u"/></svg><b>2</b></em></span>
+            <span class="d-c"><i>5</i><em class="d-u"><svg><use href="#u"/></svg><b>1</b></em></span>
+            <span class="d-c"><i>6</i><em class="d-u"><svg><use href="#u"/></svg><b>1</b></em></span>
+            <span class="d-c we"><i>7</i></span>
+            <span class="d-c we"><i>8</i></span>
+            <span class="d-c"><i>9</i><em class="d-u"><svg><use href="#u"/></svg><b>1</b></em></span>
+            <span class="d-c"><i>10</i><em class="d-u"><svg><use href="#u"/></svg><b>2</b></em></span>
+            <span class="d-c"><i>11</i><em class="d-u"><svg><use href="#u"/></svg><b>3</b></em></span>
+            <span class="d-c"><i>12</i><em class="d-u"><svg><use href="#u"/></svg><b>1</b></em></span>
+            <span class="d-c"><i>13</i><em class="d-u"><svg><use href="#u"/></svg><b>2</b></em></span>
+            <span class="d-c we"><i>14</i></span>
+            <span class="d-c we"><i>15</i></span>
+            <span class="d-c late"><i>16</i></span>
+            <span class="d-c"><i>17</i></span>
+            <span class="d-c today"><i>18</i><em class="d-u"><svg><use href="#u"/></svg><b>2</b></em></span>
+            <span class="d-c"><i>19</i><em class="d-u"><svg><use href="#u"/></svg><b>1</b></em></span>
+            <span class="d-c fin"><i>20</i><em class="d-u"><svg><use href="#u"/></svg><b>1</b></em></span>
+            <span class="d-c we"><i>21</i></span>
+            <span class="d-c we"><i>22</i></span>
+            <span class="d-c"><i>23</i><em class="d-u"><svg><use href="#u"/></svg><b>2</b></em></span>
+            <span class="d-c"><i>24</i><em class="d-u"><svg><use href="#u"/></svg><b>1</b></em></span>
+            <span class="d-c"><i>25</i><em class="d-u"><svg><use href="#u"/></svg><b>2</b></em></span>
+            <span class="d-c"><i>26</i><em class="d-u"><svg><use href="#u"/></svg><b>1</b></em></span>
+            <span class="d-c"><i>27</i><em class="d-u"><svg><use href="#u"/></svg><b>3</b></em></span>
+            <span class="d-c we"><i>28</i></span>
+            <span class="d-c we"><i>29</i></span>
+            <span class="d-c"><i>30</i><em class="d-u"><svg><use href="#u"/></svg><b>1</b></em></span>
+            <span class="d-c out"></span><span class="d-c out"></span><span class="d-c out"></span><span class="d-c out"></span><span class="d-c out"></span><span class="d-c out"></span>
+          </div>
+          <div class="d-leg">
+            <span><em class="d-u"><svg><use href="#u"/></svg></em>nº de pacientes</span>
+            <span><i class="dot fin"></i>alguien termina</span>
+            <span><i class="dot late"></i>pospuesto</span>
+          </div>
+          <div class="d-day">
+            <div class="d-day-h"><b>Miércoles 18</b><span>2 pacientes</span></div>
+            <div class="d-p"><span class="d-av">DC</span><div><b>Dayana C.</b><span>TC c/21 días · C2 de 4</span></div></div>
+            <div class="d-p"><span class="d-av">ML</span><div><b>Mercedes L.</b><span>Paclitaxel semanal · 9 de 12</span></div></div>
+          </div>
+          <div class="grow"></div>
+          <nav class="d-nav"><span class="on">Calendario</span><span>Pacientes</span><span>Protocolos</span></nav>
+        </div></div>
+        <figcaption>
+          <h3>D · Calendario</h3>
+          <p>El mes completo. Cada día muestra cuántos pacientes tiene, y un punto de color si alguien termina o se pospuso. Al tocar un día, debajo aparece su lista.</p>
+          <p class="fit">Para: planificar con antelación y ver qué días se cargan más.</p>
+        </figcaption>
+      </figure>
+
+      <figure class="design span">
+        <div class="phone a e"><div class="scr">
+          <div class="sb"><span>9:41</span><span>100%</span></div>
+          <div class="a-head"><small>6 pacientes en tratamiento</small><h4>Línea de tiempo</h4></div>
+          <div class="a-seg"><span>Semana</span><span>Mes</span><span class="on">Línea</span></div>
+          <div class="g" style="--t:16">
+            <div class="g-row g-scale"><span></span><div class="g-track"><span>2/11</span><span>9</span><span>16</span><span>23</span><span>30</span><span>7/12</span><span>14</span></div></div>
+            <div class="g-row"><div class="g-name"><b>Rosa M.</b><span>AC · C4/4</span></div><div class="g-track">
+              <i class="g-cy alt" style="--s:0;--l:18"></i><i class="g-cy" style="--s:18;--l:21"></i><i class="g-se last" style="--s:18"></i></div></div>
+            <div class="g-row"><div class="g-name"><b>Mercedes L.</b><span>Paclitaxel · 9/12</span></div><div class="g-track">
+              <i class="g-cy" style="--s:0;--l:2"></i><i class="g-cy alt" style="--s:2;--l:7"></i><i class="g-cy" style="--s:9;--l:7"></i><i class="g-cy alt" style="--s:16;--l:7"></i><i class="g-cy" style="--s:23;--l:7"></i><i class="g-cy alt" style="--s:30;--l:7"></i><i class="g-cy" style="--s:37;--l:7"></i>
+              <i class="g-se" style="--s:2"></i><i class="g-se" style="--s:9"></i><i class="g-se" style="--s:16"></i><i class="g-se" style="--s:23"></i><i class="g-se" style="--s:30"></i><i class="g-se last" style="--s:37"></i></div></div>
+            <div class="g-row"><div class="g-name"><b>Ernesto V.</b><span>FOLFOX · C11/12</span></div><div class="g-track">
+              <i class="g-cy" style="--s:3;--l:14"></i><i class="g-cy alt" style="--s:17;--l:14"></i><i class="g-cy" style="--s:31;--l:14"></i>
+              <i class="g-se" style="--s:3;--w:2"></i><i class="g-se" style="--s:17;--w:2"></i><i class="g-se last" style="--s:31;--w:2"></i></div></div>
+            <div class="g-row"><div class="g-name"><b>Dayana C.</b><span>TC · C2/4</span></div><div class="g-track">
+              <i class="g-cy alt" style="--s:0;--l:16"></i><i class="g-cy" style="--s:16;--l:21"></i><i class="g-cy alt" style="--s:37;--l:12"></i>
+              <i class="g-se" style="--s:16"></i><i class="g-se" style="--s:37"></i></div></div>
+            <div class="g-row"><div class="g-name"><b>Yoel P.</b><span>FOLFOX · C6/12</span></div><div class="g-track">
+              <i class="g-cy" style="--s:0;--l:14"></i><i class="g-cy late" style="--s:14;--l:7"></i><i class="g-cy alt" style="--s:21;--l:14"></i><i class="g-cy" style="--s:35;--l:14"></i>
+              <i class="g-se" style="--s:0;--w:2"></i><i class="g-se" style="--s:21;--w:2"></i><i class="g-se" style="--s:35;--w:2"></i></div></div>
+            <div class="g-row"><div class="g-name"><b>Luis F.</b><span>GemCis · C1/4</span></div><div class="g-track">
+              <i class="g-cy" style="--s:22;--l:21"></i><i class="g-cy alt" style="--s:43;--l:6"></i>
+              <i class="g-se" style="--s:22"></i><i class="g-se" style="--s:29"></i><i class="g-se" style="--s:43"></i></div></div>
+            <div class="g-today"><span>hoy</span></div>
+          </div>
+          <div class="g-leg">
+            <span><i class="k-cy"></i>ciclo</span>
+            <span><i class="k-se"></i>sesión</span>
+            <span><i class="k-last"></i>última sesión</span>
+            <span><i class="k-late"></i>pospuesto</span>
+          </div>
+          <p class="g-hint">Desliza a la derecha para ver más semanas →</p>
+          <div class="grow"></div>
+          <nav class="a-nav"><span class="on">Agenda</span><span>Pacientes</span><span>Protocolos</span></nav>
+        </div></div>
+        <figcaption>
+          <h3>E · Línea de tiempo</h3>
+          <p>Una fila por paciente en tratamiento. Cada bloque es un ciclo y cada marca es una sesión: Luis F. tiene dos por ciclo, el día 1 y el día 8. La línea vertical es hoy.</p>
+          <p class="fit">Para: ver de un vistazo en qué punto está cada paciente y cuánto le falta.</p>
+        </figcaption>
+      </figure>
+
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <p class="eyebrow">Para ajustar el rumbo</p>
+      <h2>Lo que queda por confirmar</h2>
+      <p>Con estas respuestas se puede empezar a construir la fase 1.</p>
+    </div>
+    <ol class="qs">
+      <li><div>¿Está bien entendido? Un tratamiento tiene ciclos, y cada ciclo dura un número de días y tiene una o más sesiones.<small>Ejemplo: gemcitabina + cisplatino, 4 ciclos de 21 días, con sesiones el día 1 y el día 8.</small></div></li>
+      <li><div>Cuando dices que un paciente "termina", ¿te refieres a la última sesión o al final del último ciclo?<small>En el ejemplo de AC: 5 de enero o 26 de enero. De esto depende cuándo pasa al histórico.</small></div></li>
+      <li><div>El aviso del viernes, ¿a qué hora lo quieres y qué debe incluir?<small>Propuesta: quién termina la semana siguiente, las sesiones de la semana siguiente y los pospuestos.</small></div></li>
+      <li><div>¿Cuántos pacientes en tratamiento llevas a la vez, más o menos?<small>Sirve para saber cuántas filas tendrá la línea de tiempo.</small></div></li>
+      <li><div>Cuando un paciente termina, ¿qué seguimiento le haces y cada cuánto?</div></li>
+      <li><div>¿Qué otros listados te serían útiles, además de pacientes por protocolo?</div></li>
+    </ol>
+  </section>
+
+  <footer>Todos los pacientes, números de historia y fechas de esta página son de ejemplo e inventados.</footer>
+</div>
