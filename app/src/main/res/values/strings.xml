@@ -1,4 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Ciclo</string>
+
+    <string name="protocols_title">Protocolos</string>
+    <string name="protocols_add">Añadir protocolo</string>
+    <string name="protocols_show_archived">Mostrar archivados</string>
+    <string name="protocols_empty">No hay protocolos.</string>
+    <string name="protocol_edit">Editar</string>
+    <string name="protocol_archive">Archivar</string>
+    <string name="protocol_restore">Restaurar</string>
+    <string name="protocol_archived_badge">Archivado</string>
+    <string name="protocol_summary">Ciclo de %1$d días · %2$s · %3$s</string>
+    <string name="protocol_until_progression">hasta progresión, reevaluar cada %1$d ciclos</string>
+    <plurals name="protocol_cycles">
+        <item quantity="one">%d ciclo</item>
+        <item quantity="other">%d ciclos</item>
+    </plurals>
+
+    <string name="protocol_form_new_title">Nuevo protocolo</string>
+    <string name="protocol_form_edit_title">Editar protocolo</string>
+    <string name="protocol_form_name">Nombre</string>
+    <string name="protocol_form_cycle_length">Duración del ciclo (días)</string>
+    <string name="protocol_form_session_days">Días de sesión (ej. 1, 8)</string>
+    <string name="protocol_form_until_progression">Hasta progresión</string>
+    <string name="protocol_form_cycles">Número de ciclos</string>
+    <string name="protocol_form_reevaluate">Reevaluar cada (ciclos)</string>
+    <string name="protocol_form_save">Guardar</string>
+    <string name="protocol_form_cancel">Cancelar</string>
+    <string name="protocol_error_name">Escribe un nombre</string>
+    <string name="protocol_error_cycle_length">Número de días inválido</string>
+    <string name="protocol_error_session_days">Días de sesión inválidos</string>
+    <string name="protocol_error_cycles">Número de ciclos inválido</string>
+    <string name="protocol_error_duplicate">Ya existe un protocolo con ese nombre</string>
 </resources>
