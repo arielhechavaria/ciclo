@@ -4,10 +4,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import org.junit.Assert.assertEquals
@@ -19,7 +21,7 @@ import org.robolectric.annotation.Config
 import kotlin.coroutines.EmptyCoroutineContext
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
+@Config(sdk = [34], qualifiers = "w411dp-h891dp")
 class ProtocolCatalogScreenTest {
     @get:Rule
     val rule = createComposeRule()
@@ -30,6 +32,10 @@ class ProtocolCatalogScreenTest {
         MaterialTheme { ProtocolCatalogScreen(catalog, EmptyCoroutineContext) }
     }
 
+    private fun scrollTo(name: String) {
+        rule.onNode(hasScrollAction()).performScrollToNode(hasTestTag("protocol-$name"))
+    }
+
     private fun inRow(name: String, text: String) =
         hasText(text) and hasAnyAncestor(hasTestTag("protocol-$name"))
 
@@ -37,6 +43,7 @@ class ProtocolCatalogScreenTest {
     fun listsTheActiveProtocolsWithTheirStructure() {
         show()
         rule.onNode(inRow("AC", "Ciclo de 21 días · D1 · 4 ciclos")).assertIsDisplayed()
+        scrollTo("Gemcitabina + cisplatino")
         rule.onNode(inRow("Gemcitabina + cisplatino", "Ciclo de 21 días · D1, D8 · 4 ciclos")).assertIsDisplayed()
     }
 
@@ -63,6 +70,7 @@ class ProtocolCatalogScreenTest {
         rule.onNodeWithText("Número de ciclos").performTextInput("4")
         rule.onNodeWithText("Guardar").performClick()
 
+        scrollTo("FLOT")
         rule.onNode(inRow("FLOT", "Ciclo de 14 días · D1 · 4 ciclos")).assertIsDisplayed()
         assertEquals(9, catalog.all().size)
     }
@@ -78,6 +86,7 @@ class ProtocolCatalogScreenTest {
         rule.onNodeWithText("Reevaluar cada (ciclos)").performTextInput("4")
         rule.onNodeWithText("Guardar").performClick()
 
+        scrollTo("Trastuzumab")
         rule.onNode(
             inRow("Trastuzumab", "Ciclo de 21 días · D1 · hasta progresión, reevaluar cada 4 ciclos"),
         ).assertIsDisplayed()

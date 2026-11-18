@@ -1,6 +1,9 @@
 package com.isora.ciclo.protocols
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,8 +27,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -107,12 +110,11 @@ fun ProtocolCatalogScreen(catalog: ProtocolCatalog, io: CoroutineContext = Dispa
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(vertical = 16.dp),
             )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Switch(checked = showArchived, onCheckedChange = { showArchived = it })
-                TextButton(onClick = { showArchived = !showArchived }) {
-                    Text(stringResource(R.string.protocols_show_archived))
-                }
-            }
+            LabeledSwitch(
+                label = stringResource(R.string.protocols_show_archived),
+                checked = showArchived,
+                onChange = { showArchived = it },
+            )
             if (items.isEmpty()) Text(stringResource(R.string.protocols_empty))
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(items, key = { it.id.value }) { entry ->
@@ -198,7 +200,7 @@ private fun ProtocolFormDialog(
             )
         },
         text = {
-            Column {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
                 field(
                     R.string.protocol_form_name,
                     form.name,
@@ -218,13 +220,11 @@ private fun ProtocolFormDialog(
                     form.sessionDays,
                     R.string.protocol_error_session_days.takeIf { ProtocolFormError.SESSION_DAYS_INVALID in errors },
                 ) { onChange(form.copy(sessionDays = it)) }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Switch(
-                        checked = form.untilProgression,
-                        onCheckedChange = { onChange(form.copy(untilProgression = it)) },
-                    )
-                    Text(stringResource(R.string.protocol_form_until_progression), Modifier.padding(start = 8.dp))
-                }
+                LabeledSwitch(
+                    label = stringResource(R.string.protocol_form_until_progression),
+                    checked = form.untilProgression,
+                    onChange = { onChange(form.copy(untilProgression = it)) },
+                )
                 field(
                     if (form.untilProgression) R.string.protocol_form_reevaluate else R.string.protocol_form_cycles,
                     form.cycles,
@@ -235,4 +235,16 @@ private fun ProtocolFormDialog(
         confirmButton = { TextButton(onClick = onSave) { Text(stringResource(R.string.protocol_form_save)) } },
         dismissButton = { TextButton(onClick = onCancel) { Text(stringResource(R.string.protocol_form_cancel)) } },
     )
+}
+
+/** A switch whose label is part of the touch target, so tapping the text toggles it. */
+@Composable
+private fun LabeledSwitch(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+    Row(
+        Modifier.toggleable(value = checked, role = Role.Switch, onValueChange = onChange).padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Switch(checked = checked, onCheckedChange = null)
+        Text(label, Modifier.padding(start = 8.dp))
+    }
 }
