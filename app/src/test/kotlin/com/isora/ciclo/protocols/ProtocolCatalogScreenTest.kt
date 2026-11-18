@@ -8,8 +8,6 @@ import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.printToString
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextClearance
@@ -56,11 +54,11 @@ class ProtocolCatalogScreenTest {
         rule.onNode(hasTestTag("protocol-AC")).assertDoesNotExist()
 
         rule.onNodeWithText("Mostrar archivados").performClick()
-        println("TREE-AFTER-TOGGLE: " + rule.onRoot().printToString(60) + " ALL=" + catalog.all(true).map { it.protocol.name to it.archived })
-        rule.onNode(hasTestTag("protocol-AC")).assertExists()
-        rule.onNodeWithText("Archivado").assertExists()
+        scrollTo("AC")
+        rule.onNode(inRow("AC", "Archivado")).assertIsDisplayed()
         rule.onNode(inRow("AC", "Restaurar")).performClick()
         rule.onNodeWithText("Mostrar archivados").performClick()
+        scrollTo("AC")
         rule.onNode(hasTestTag("protocol-AC")).assertIsDisplayed()
         assertEquals(8, catalog.all().size)
     }
