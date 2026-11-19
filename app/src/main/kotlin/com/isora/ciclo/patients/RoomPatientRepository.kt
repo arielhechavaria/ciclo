@@ -8,7 +8,16 @@ class RoomPatientRepository(private val dao: PatientDao) : PatientRepository {
 
     override fun findById(id: PatientId): StoredPatient? = dao.findById(id.value)?.toStored()
 
+    /** The unique index only catches exact matches, so case and spacing are checked here. */
+    private fun requireFreeRecord(patient: Patient, ownId: Long?) {
+        val key = recordKey(patient.clinicalRecordNumber)
+        if (dao.all().any { it.id != ownId && recordKey(it.clinicalRecordNumber) == key }) {
+            throw DuplicateClinicalRecordException(patient.clinicalRecordNumber)
+        }
+    }
+
     override fun add(patient: Patient): StoredPatient {
+        requireFreeRecord(patient, ownId = null)
         val id = try {
             dao.insert(patient.toEntity(0))
         } catch (e: SQLiteConstraintException) {
@@ -18,6 +27,7 @@ class RoomPatientRepository(private val dao: PatientDao) : PatientRepository {
     }
 
     override fun update(id: PatientId, patient: Patient) {
+        requireFreeRecord(patient, ownId = id.value)
         val changed = try {
             dao.update(patient.toEntity(id.value))
         } catch (e: SQLiteConstraintException) {
