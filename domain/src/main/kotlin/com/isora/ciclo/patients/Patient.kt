@@ -31,6 +31,9 @@ class Patient(
 
 data class StoredPatient(val id: PatientId, val patient: Patient)
 
+/** Two record numbers are the same when they differ only in case or whitespace: "HC1001" = "hc 1001", but "HC-1001" is different. */
+fun recordKey(clinicalRecordNumber: String): String = clinicalRecordNumber.filterNot(Char::isWhitespace).lowercase()
+
 class DuplicateClinicalRecordException(val clinicalRecordNumber: String) :
     RuntimeException("Clinical record number $clinicalRecordNumber already belongs to another patient")
 

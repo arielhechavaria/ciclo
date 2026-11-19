@@ -36,6 +36,24 @@ class RoomPatientRepositoryTest : StorageTestBase() {
     }
 
     @Test
+    fun recordNumbersDifferingOnlyInCaseOrSpacesAreTheSame() {
+        repository.add(Patient("Alberto R.", "HC 1001"))
+        listOf("hc1001", "Hc  1001", " HC1001 ").forEach { variant ->
+            assertThrows(DuplicateClinicalRecordException::class.java) { repository.add(Patient("Otra", variant)) }
+        }
+        val other = repository.add(Patient("Maria L.", "HC-1001"))
+        assertThrows(DuplicateClinicalRecordException::class.java) { repository.update(other.id, Patient("Maria L.", "hc1001")) }
+        assertEquals(2, repository.all().size)
+    }
+
+    @Test
+    fun aPatientCanChangeOnlyTheCaseOfItsOwnRecordNumber() {
+        val saved = repository.add(Patient("Alberto R.", "hc1001"))
+        repository.update(saved.id, Patient("Alberto R.", "HC1001"))
+        assertEquals("HC1001", repository.findById(saved.id)?.patient?.clinicalRecordNumber)
+    }
+
+    @Test
     fun updatingAMissingPatientFailsInsteadOfDoingNothing() {
         assertThrows(NoSuchElementException::class.java) {
             repository.update(PatientId(999), Patient("Nadie", "00000"))
