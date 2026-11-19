@@ -17,7 +17,7 @@ import com.isora.ciclo.treatments.TreatmentEntity
 @Database(
     entities = [ProtocolEntity::class, PatientEntity::class, TreatmentEntity::class, SessionStateEntity::class],
     version = 1,
-    exportSchema = false,
+    exportSchema = true,
 )
 abstract class CicloDatabase : RoomDatabase() {
     abstract fun protocolDao(): ProtocolDao
