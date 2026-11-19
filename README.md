@@ -23,3 +23,9 @@ Locally, with JDK 17, Gradle 8.7 and the Android SDK installed:
 ```sh
 gradle :domain:test :app:testDebugUnitTest :app:assembleDebug
 ```
+
+## UI screenshots
+
+Every CI run renders the main screens (Agenda in its three views, patients, patient with a treatment, protocols, settings, lock) with fake data and publishes them as PNGs, so UI changes can be reviewed without installing the app.
+
+To download them: GitHub → **Actions** → latest **Build** run → **Artifacts** → `ui-screenshots`. The run summary also lists the file names. Locally they are written to `app/build/screenshots/` by `gradle :app:testDebugUnitTest`.
