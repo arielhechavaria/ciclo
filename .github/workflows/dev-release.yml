@@ -1,0 +1,65 @@
+name: Dev release
+
+# Every push to main publishes a rolling pre-release (tag dev-N) with a debug APK signed with the
+# stable key. Point Obtainium at the repository (with pre-releases enabled) to get each build.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: dev-release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  dev-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
+
+      - name: Decode signing key
+        env:
+          CICLO_KEYSTORE_BASE64: ${{ secrets.CICLO_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$CICLO_KEYSTORE_BASE64" ]; then
+            echo "::error::Missing CICLO_KEYSTORE_BASE64 secret."
+            exit 1
+          fi
+          echo "$CICLO_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/ciclo-release.p12"
+
+      - name: Test and build signed debug APK
+        timeout-minutes: 15
+        env:
+          CICLO_KEYSTORE_PATH: ${{ runner.temp }}/ciclo-release.p12
+          CICLO_KEYSTORE_PASSWORD: ${{ secrets.CICLO_KEYSTORE_PASSWORD }}
+          CICLO_KEY_ALIAS: ${{ secrets.CICLO_KEY_ALIAS }}
+          # Offset keeps dev builds above the versionCode of earlier tagged releases.
+          CICLO_VERSION_CODE: ${{ github.run_number }}000
+          CICLO_VERSION_NAME: 0.1.2-dev.${{ github.run_number }}
+        run: gradle :domain:test :app:testDebugUnitTest :app:assembleDebug --no-daemon
+
+      - name: Publish dev pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="dev-${GITHUB_RUN_NUMBER}"
+          apk="ciclo-${tag}.apk"
+          cp app/build/outputs/apk/debug/app-debug.apk "$apk"
+          gh release create "$tag" "$apk" --target "$GITHUB_SHA" \
+            --title "Ciclo dev ${GITHUB_RUN_NUMBER}" --generate-notes --prerelease
+          # Keep only the five newest dev releases.
+          gh release list --limit 100 --json tagName --jq '.[].tagName' \
+            | grep '^dev-' | sort -t- -k2 -n -r | tail -n +6 \
+            | xargs -r -n1 gh release delete --cleanup-tag --yes
