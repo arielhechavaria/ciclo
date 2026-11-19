@@ -83,6 +83,9 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
 
     implementation("androidx.biometric:biometric:1.1.0")
+    // On-device OCR with the model bundled in the APK: works offline, no Google Play Services.
+    // The manifest strips the network permissions it brings, so nothing can leave the phone.
+    implementation("com.google.mlkit:text-recognition:16.0.1")
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("net.zetetic:sqlcipher-android:4.5.6@aar")
     implementation("androidx.sqlite:sqlite:2.4.0")

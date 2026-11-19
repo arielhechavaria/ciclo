@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.isora.ciclo.R
@@ -46,6 +47,7 @@ fun PatientListScreen(
     followUpMonths: Int,
     onOpen: (PatientId) -> Unit,
     onAdd: (Patient, (PatientConflict?) -> Unit) -> Unit,
+    onPhoto: (() -> Unit)? = null,
 ) {
     var query by remember { mutableStateOf("") }
     var adding by remember { mutableStateOf(false) }
@@ -62,7 +64,12 @@ fun PatientListScreen(
 
     Scaffold(
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = { adding = true }) { Text(stringResource(R.string.patients_add)) }
+            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(CicloSpacing.xs)) {
+                onPhoto?.let { open ->
+                    ExtendedFloatingActionButton(onClick = open) { Text(stringResource(R.string.list_photo_open)) }
+                }
+                ExtendedFloatingActionButton(onClick = { adding = true }) { Text(stringResource(R.string.patients_add)) }
+            }
         },
     ) { padding ->
         Column(Modifier.padding(padding).padding(horizontal = CicloSpacing.md)) {

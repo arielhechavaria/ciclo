@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Only the private cache folder for the daily list photo is shared, and only with the camera app. -->
+<paths>
+    <cache-path name="list_photo" path="list_photo/" />
+</paths>
