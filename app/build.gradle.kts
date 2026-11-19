@@ -4,6 +4,11 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
+// Room writes the schema of every database version here; commit it so migrations can be tested against it.
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 android {
     namespace = "com.isora.ciclo"
     compileSdk = 34
