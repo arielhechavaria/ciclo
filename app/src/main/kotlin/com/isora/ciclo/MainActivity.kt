@@ -38,9 +38,9 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    /** The app locks every time it leaves the foreground. */
+    /** The app locks every time it leaves the foreground, except while it waits for a file picker it opened. */
     override fun onStop() {
         super.onStop()
-        locked = true
+        if (!container.lockGuard.suspended) locked = true
     }
 }

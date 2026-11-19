@@ -134,6 +134,9 @@ fun CicloApp(container: AppContainer, pins: PinStore, onLockNow: () -> Unit) {
                     Tab.SETTINGS -> SettingsScreen(
                         settings = container.settings,
                         pins = pins,
+                        backup = container.backup,
+                        lockGuard = container.lockGuard,
+                        onRestored = { scope.launch { load() } },
                         onLockNow = onLockNow,
                         onLoadMock = if (BuildConfig.MOCK_DATA) {
                             { write { MockSeeder.seed(container, today) } }

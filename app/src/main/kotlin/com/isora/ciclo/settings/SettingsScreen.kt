@@ -35,7 +35,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import com.isora.ciclo.R
+import com.isora.ciclo.backup.BackupSection
+import com.isora.ciclo.backup.BackupService
 import com.isora.ciclo.notifications.FridayNotifier
+import com.isora.ciclo.security.LockGuard
 import com.isora.ciclo.security.PinStore
 import java.time.format.DateTimeFormatter
 
@@ -43,7 +46,15 @@ private val timeFormat = DateTimeFormatter.ofPattern("HH:mm")
 
 /** Friday notification (switch, time, the permissions it needs on old phones) and the lock. */
 @Composable
-fun SettingsScreen(settings: AppSettings, pins: PinStore, onLockNow: () -> Unit, onLoadMock: (() -> Unit)? = null) {
+fun SettingsScreen(
+    settings: AppSettings,
+    pins: PinStore,
+    backup: BackupService,
+    lockGuard: LockGuard,
+    onRestored: () -> Unit,
+    onLockNow: () -> Unit,
+    onLoadMock: (() -> Unit)? = null,
+) {
     val context = LocalContext.current
     var enabled by remember { mutableStateOf(settings.fridayEnabled) }
     var timeText by remember { mutableStateOf(settings.fridayTime.format(timeFormat)) }
@@ -133,6 +144,8 @@ fun SettingsScreen(settings: AppSettings, pins: PinStore, onLockNow: () -> Unit,
             onClick = { context.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)) },
             modifier = Modifier.fillMaxWidth().padding(top = CicloSpacing.xs),
         ) { Text(stringResource(R.string.settings_battery)) }
+
+        BackupSection(backup, lockGuard, onRestored)
 
         Text(stringResource(R.string.settings_lock), Modifier.padding(top = CicloSpacing.xl), style = MaterialTheme.typography.titleMedium)
         if (fingerprintAvailable) {
