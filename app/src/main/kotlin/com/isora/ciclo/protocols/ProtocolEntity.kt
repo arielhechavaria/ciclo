@@ -38,6 +38,9 @@ interface ProtocolDao {
     @Insert
     fun insertAll(entities: List<ProtocolEntity>)
 
+    @Query("DELETE FROM protocols")
+    fun deleteAll()
+
     @Update
     fun update(entity: ProtocolEntity)
 

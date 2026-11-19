@@ -1,9 +1,11 @@
 package com.isora.ciclo
 
 import android.app.Application
+import com.isora.ciclo.backup.BackupService
 import com.isora.ciclo.patients.RoomPatientRepository
 import com.isora.ciclo.protocols.RoomProtocolCatalog
 import com.isora.ciclo.security.DatabaseKey
+import com.isora.ciclo.security.LockGuard
 import com.isora.ciclo.settings.AppSettings
 import com.isora.ciclo.storage.CicloDatabase
 import com.isora.ciclo.treatments.RoomTreatmentRepository
@@ -14,6 +16,8 @@ class AppContainer(application: Application) {
     val catalog by lazy { RoomProtocolCatalog(database.protocolDao()) }
     val patients by lazy { RoomPatientRepository(database.patientDao()) }
     val treatments by lazy { RoomTreatmentRepository(database.treatmentDao()) }
+    val backup by lazy { BackupService(database) }
+    val lockGuard = LockGuard()
     val settings = AppSettings(application)
 }
 

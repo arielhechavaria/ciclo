@@ -77,8 +77,20 @@ abstract class TreatmentDao {
     @Query("SELECT * FROM session_states WHERE treatment_id = :treatmentId")
     abstract fun statesOf(treatmentId: Long): List<SessionStateEntity>
 
+    @Query("SELECT * FROM session_states ORDER BY treatment_id, cycle, session")
+    abstract fun allStates(): List<SessionStateEntity>
+
     @Insert
     abstract fun insert(entity: TreatmentEntity): Long
+
+    @Insert
+    abstract fun insertAll(entities: List<TreatmentEntity>)
+
+    @Query("DELETE FROM treatments")
+    abstract fun deleteAll()
+
+    @Query("DELETE FROM session_states")
+    abstract fun deleteAllStates()
 
     @Insert
     abstract fun insertStates(states: List<SessionStateEntity>)
