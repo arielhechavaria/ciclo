@@ -40,6 +40,7 @@ class RoomTreatmentRepository(private val dao: TreatmentDao) : TreatmentReposito
             earlyFinish = entity.finishEpochDay?.let {
                 EarlyFinish(LocalDate.ofEpochDay(it), entity.finishReason.orEmpty())
             },
+            followUpDoneOn = entity.followUpDoneEpochDay?.let(LocalDate::ofEpochDay),
         )
         return StoredTreatment(TreatmentId(entity.id), PatientId(entity.patientId), entity.protocolName, treatment)
     }
@@ -56,6 +57,7 @@ private fun Treatment.toEntity(id: Long, patientId: Long, protocolName: String) 
     startEpochDay = startDate.toEpochDay(),
     finishEpochDay = earlyFinish?.date?.toEpochDay(),
     finishReason = earlyFinish?.reason,
+    followUpDoneEpochDay = followUpDoneOn?.toEpochDay(),
 )
 
 private fun Treatment.toStates(treatmentId: Long): List<SessionStateEntity> =

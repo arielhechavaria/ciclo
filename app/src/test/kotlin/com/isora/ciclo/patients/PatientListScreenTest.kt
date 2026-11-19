@@ -29,10 +29,12 @@ class PatientListScreenTest {
     private val today = LocalDate.of(2026, 11, 18)
     private val ac = Protocol("AC", Regimen(21, listOf(1)), CycleCount.Fixed(4))
     private val folfox = Protocol("FOLFOX", Regimen(14, listOf(1)), CycleCount.Fixed(1))
+    private val past = Protocol("AC", Regimen(21, listOf(1)), CycleCount.Fixed(4))
     private val snapshot = CareSnapshot(
         listOf(
             StoredPatient(PatientId(1), Patient("Ana", "HC-1")),
             StoredPatient(PatientId(2), Patient("Diana", "HC-2")),
+            StoredPatient(PatientId(3), Patient("Berta", "HC-3")),
         ),
         listOf(
             StoredTreatment(
@@ -40,11 +42,13 @@ class PatientListScreenTest {
                 Treatment.assign(ac, LocalDate.of(2026, 11, 3)).postpone(SessionRef(1, 1), LocalDate.of(2026, 11, 5)),
             ),
             StoredTreatment(TreatmentId(2), PatientId(2), "FOLFOX", Treatment.assign(folfox, LocalDate.of(2026, 11, 10))),
+            // Ended on 2026-03-30, so the 3-month follow-up was due on 2026-06-30.
+            StoredTreatment(TreatmentId(3), PatientId(3), "AC", Treatment.assign(past, LocalDate.of(2026, 1, 5))),
         ),
     )
 
     private fun show() = rule.setContent {
-        MaterialTheme { PatientListScreen(snapshot, today, onOpen = {}, onAdd = { _, _ -> }) }
+        MaterialTheme { PatientListScreen(snapshot, today, followUpMonths = 3, onOpen = {}, onAdd = { _, _ -> }) }
     }
 
     @Test
@@ -76,5 +80,14 @@ class PatientListScreenTest {
         show()
         rule.onNodeWithText("Ana", substring = true).assertIsDisplayed()
         rule.onNodeWithText("Diana", substring = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun followUpFilterListsFinishedTreatmentsWithTheirDueDate() {
+        show()
+        rule.onNodeWithText("Seguimiento").performClick()
+        rule.onNodeWithText("Berta", substring = true).assertIsDisplayed()
+        rule.onNodeWithText("revisión el", substring = true).assertIsDisplayed()
+        rule.onNodeWithText("Ana", substring = true).assertDoesNotExist()
     }
 }

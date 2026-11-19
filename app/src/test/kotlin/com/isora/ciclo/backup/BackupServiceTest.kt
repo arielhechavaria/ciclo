@@ -157,4 +157,36 @@ class BackupServiceTest : StorageTestBase() {
 
         assertTrue(patients.all().isEmpty())
     }
+
+    @Test
+    fun `the follow-up mark survives an export and a restore`() {
+        fill()
+        val stored = treatments.all().single()
+        treatments.save(stored.copy(treatment = stored.treatment.markFollowUpDone(day.plusDays(200))))
+        val file = service.export(password)
+
+        db.clearAllTables()
+        service.restore(file, password)
+
+        assertEquals(day.plusDays(200), treatments.all().single().treatment.followUpDoneOn)
+    }
+
+    @Test
+    fun `a backup made before follow-up existed still restores with no follow-up done`() {
+        fill()
+        val json = org.json.JSONObject(BackupJson.encode(
+            BackupSnapshot(
+                emptyList(),
+                db.patientDao().all(), db.treatmentDao().all(), db.treatmentDao().allStates(),
+            ),
+            day,
+        ))
+        json.getJSONArray("treatments").let { array ->
+            for (i in 0 until array.length()) array.getJSONObject(i).remove("followUpDoneEpochDay")
+        }
+
+        val decoded = BackupJson.decode(json.toString())
+
+        assertEquals(null, decoded.treatments.single().followUpDoneEpochDay)
+    }
 }

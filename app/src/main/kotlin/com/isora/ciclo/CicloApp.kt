@@ -110,6 +110,7 @@ fun CicloApp(container: AppContainer, pins: PinStore, onLockNow: () -> Unit) {
                     treatments = snapshot.treatmentsOf(patient.id),
                     protocols = protocols,
                     today = today,
+                    followUpMonths = container.settings.followUpMonths,
                     onBack = { openPatient = null },
                     onEditPatient = { updated: Patient, done: (Boolean) -> Unit ->
                         write(then = done) { container.patients.update(patient.id, updated) }
@@ -125,6 +126,7 @@ fun CicloApp(container: AppContainer, pins: PinStore, onLockNow: () -> Unit) {
                     Tab.PATIENTS -> PatientListScreen(
                         snapshot = snapshot,
                         today = today,
+                        followUpMonths = container.settings.followUpMonths,
                         onOpen = { openPatient = it },
                         onAdd = { newPatient: Patient, done: (Boolean) -> Unit ->
                             write(then = done) { container.patients.add(newPatient) }

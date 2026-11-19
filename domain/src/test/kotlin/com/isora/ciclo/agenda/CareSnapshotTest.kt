@@ -81,4 +81,27 @@ class CareSnapshotTest {
         assertEquals(listOf("Diana"), listed.finishingThisMonth(today).map { it.name })
         assertTrue(listed.finishingThisMonth(LocalDate.of(2026, 11, 25)).isEmpty())
     }
+
+    @Test
+    fun followUpsListFinishedTreatmentsNotYetReviewedByDueDate() {
+        // Berta finished on 2026-03-30 (AC from 2026-01-05, 4 cycles of 21 days); Ana is still running.
+        val due = snapshot.followUps(today, months = 3)
+        assertEquals(listOf("Berta"), due.map { it.entry.name })
+        assertEquals(LocalDate.of(2026, 6, 30), due.single().dueOn)
+    }
+
+    @Test
+    fun followUpsLeaveOutTheOnesAlreadyDone() {
+        val reviewed = CareSnapshot(
+            patients,
+            treatments.map {
+                if (it.patientId == PatientId(2)) {
+                    StoredTreatment(it.id, it.patientId, it.protocolName, it.treatment.markFollowUpDone(today))
+                } else {
+                    it
+                }
+            },
+        )
+        assertTrue(reviewed.followUps(today, months = 3).isEmpty())
+    }
 }

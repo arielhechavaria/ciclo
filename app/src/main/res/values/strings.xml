@@ -70,6 +70,11 @@
     <string name="patients_filter_protocol">Por protocolo</string>
     <string name="patients_filter_postponed">Pospuestos</string>
     <string name="patients_filter_finishing">Terminan este mes</string>
+    <string name="patients_filter_follow_up">Seguimiento</string>
+    <string name="patients_follow_up_due">revisión el %1$s</string>
+    <string name="follow_up_due">Seguimiento: revisar el %1$s</string>
+    <string name="follow_up_done_on">Seguimiento hecho el %1$s</string>
+    <string name="follow_up_mark_done">Marcar seguimiento hecho</string>
     <string name="patients_filter_empty">Ningún paciente en esta lista.</string>
     <string name="patients_history">Historial</string>
     <string name="patient_no_treatment">Sin tratamiento</string>
@@ -120,6 +125,9 @@
     <string name="settings_allow_notifications">Permitir notificaciones</string>
     <string name="settings_exact_alarm">Permitir alarmas exactas</string>
     <string name="settings_battery">Ajustes de optimización de batería</string>
+    <string name="settings_follow_up">Seguimiento</string>
+    <string name="settings_follow_up_hint">Cuántos meses después de terminar el tratamiento toca revisar al paciente.</string>
+    <string name="settings_follow_up_months">Meses hasta la revisión (1 a 24)</string>
     <string name="settings_lock">Bloqueo</string>
     <string name="settings_fingerprint">Desbloquear con huella</string>
     <string name="settings_new_pin">Nuevo PIN (4 a 8 dígitos)</string>

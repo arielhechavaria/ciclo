@@ -39,6 +39,8 @@ data class TreatmentEntity(
     @ColumnInfo(name = "start_epoch_day") val startEpochDay: Long,
     @ColumnInfo(name = "finish_epoch_day") val finishEpochDay: Long?,
     @ColumnInfo(name = "finish_reason") val finishReason: String?,
+    /** Day the follow-up review was done; null while pending. Added in schema version 2. */
+    @ColumnInfo(name = "follow_up_done_epoch_day") val followUpDoneEpochDay: Long? = null,
 )
 
 /** State of one session that is not simply planned: given, postponed by [delayDays], or both. */

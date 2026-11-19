@@ -47,6 +47,7 @@ fun PatientScreen(
     treatments: List<StoredTreatment>,
     protocols: List<CatalogProtocol>,
     today: LocalDate,
+    followUpMonths: Int,
     onBack: () -> Unit,
     onEditPatient: (Patient, (Boolean) -> Unit) -> Unit,
     onAssign: (protocolName: String, Treatment) -> Unit,
@@ -66,7 +67,7 @@ fun PatientScreen(
             Button(onClick = { assigning = true }) { Text(stringResource(R.string.assign_title)) }
         }
         if (treatments.isEmpty()) Text(stringResource(R.string.patient_no_treatment))
-        treatments.forEach { stored -> TreatmentCard(stored, today, onChange) }
+        treatments.forEach { stored -> TreatmentCard(stored, today, followUpMonths, onChange) }
     }
 
     if (editing) {
@@ -89,7 +90,7 @@ fun PatientScreen(
 }
 
 @Composable
-private fun TreatmentCard(stored: StoredTreatment, today: LocalDate, onChange: (StoredTreatment) -> Unit) {
+private fun TreatmentCard(stored: StoredTreatment, today: LocalDate, followUpMonths: Int, onChange: (StoredTreatment) -> Unit) {
     val treatment = stored.treatment
     var shownCycles by remember { mutableStateOf(CYCLES_PER_PAGE) }
     var postponing by remember { mutableStateOf<ScheduledSession?>(null) }
@@ -127,6 +128,19 @@ private fun TreatmentCard(stored: StoredTreatment, today: LocalDate, onChange: (
                         (treatment.cycleCount as CycleCount.UntilProgression).reevaluateEveryCycles,
                     ),
                 )
+            }
+            if (treatment.isFinishedOn(today)) {
+                val done = treatment.followUpDoneOn
+                val due = treatment.followUpDate(followUpMonths)
+                if (done != null) {
+                    Text(stringResource(R.string.follow_up_done_on, done.formatLong()))
+                } else if (due != null) {
+                    Text(stringResource(R.string.follow_up_due, due.formatLong()))
+                    OutlinedButton(
+                        onClick = { onChange(stored.copy(treatment = treatment.markFollowUpDone(today))) },
+                        Modifier.padding(top = CicloSpacing.xs),
+                    ) { Text(stringResource(R.string.follow_up_mark_done)) }
+                }
             }
             visible.forEach { cycle ->
                 Text(
