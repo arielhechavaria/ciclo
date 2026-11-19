@@ -20,7 +20,8 @@ import androidx.compose.ui.res.stringResource
 import com.isora.ciclo.agenda.AgendaScreen
 import com.isora.ciclo.agenda.CareSnapshot
 import com.isora.ciclo.mock.MockSeeder
-import com.isora.ciclo.patients.DuplicateClinicalRecordException
+import com.isora.ciclo.patients.PatientConflict
+import com.isora.ciclo.patients.PatientConflictException
 import com.isora.ciclo.patients.Patient
 import com.isora.ciclo.patients.PatientId
 import com.isora.ciclo.patients.PatientListScreen
@@ -65,19 +66,19 @@ fun CicloApp(container: AppContainer, pins: PinStore, onLockNow: () -> Unit) {
         ready = true
     }
 
-    /** Runs a repository write off the main thread and reloads; [then] gets false when the write was refused. */
-    fun write(then: (Boolean) -> Unit = {}, block: () -> Unit) {
+    /** Runs a repository write off the main thread and reloads; [then] gets the conflict when a patient write was refused. */
+    fun write(then: (PatientConflict?) -> Unit = {}, block: () -> Unit) {
         scope.launch {
-            val ok = withContext(Dispatchers.IO) {
+            val conflict = withContext(Dispatchers.IO) {
                 try {
                     block()
-                    true
-                } catch (e: DuplicateClinicalRecordException) {
-                    false
+                    null
+                } catch (e: PatientConflictException) {
+                    e.conflict
                 }
             }
             load()
-            then(ok)
+            then(conflict)
         }
     }
 
@@ -112,7 +113,7 @@ fun CicloApp(container: AppContainer, pins: PinStore, onLockNow: () -> Unit) {
                     today = today,
                     followUpMonths = container.settings.followUpMonths,
                     onBack = { openPatient = null },
-                    onEditPatient = { updated: Patient, done: (Boolean) -> Unit ->
+                    onEditPatient = { updated: Patient, done: (PatientConflict?) -> Unit ->
                         write(then = done) { container.patients.update(patient.id, updated) }
                     },
                     onAssign = { name: String, treatment: Treatment ->
@@ -128,7 +129,7 @@ fun CicloApp(container: AppContainer, pins: PinStore, onLockNow: () -> Unit) {
                         today = today,
                         followUpMonths = container.settings.followUpMonths,
                         onOpen = { openPatient = it },
-                        onAdd = { newPatient: Patient, done: (Boolean) -> Unit ->
+                        onAdd = { newPatient: Patient, done: (PatientConflict?) -> Unit ->
                             write(then = done) { container.patients.add(newPatient) }
                         },
                     )

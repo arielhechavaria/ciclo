@@ -1,12 +1,15 @@
 package com.isora.ciclo.storage
 
 import android.content.Context
+import android.database.sqlite.SQLiteConstraintException
 import android.database.sqlite.SQLiteDatabase
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import com.isora.ciclo.patients.PatientEntity
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -14,18 +17,18 @@ import org.robolectric.annotation.Config
 import java.io.File
 
 /**
- * Builds a database exactly as version 1 created it (from the committed schema), opens it with the
- * current code and checks that the 1 to 2 migration keeps every row. Room validates the migrated
- * tables against the version 2 entities when it opens the file.
+ * Builds a database exactly as an older version created it (from the committed schema), opens it with
+ * the current code and checks that the migrations keep every row. Room validates the migrated tables
+ * against the current entities when it opens the file.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class MigrationTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
 
-    private fun createVersion1(file: File) {
+    private fun createVersion(version: Int, file: File) {
         // Unit tests run with the module directory as working directory.
-        val schema = JSONObject(File("schemas/com.isora.ciclo.storage.CicloDatabase/1.json").readText()).getJSONObject("database")
+        val schema = JSONObject(File("schemas/com.isora.ciclo.storage.CicloDatabase/$version.json").readText()).getJSONObject("database")
         val db = SQLiteDatabase.openOrCreateDatabase(file, null)
         val entities = schema.getJSONArray("entities")
         for (i in 0 until entities.length()) {
@@ -44,19 +47,22 @@ class MigrationTest {
                 "VALUES (7, 1, 'AC', 21, '1', 'FIXED', 4, 20000, NULL, NULL)",
         )
         db.execSQL("INSERT INTO session_states (treatment_id, cycle, session, given, delay_days) VALUES (7, 1, 1, 1, 3)")
-        db.version = 1
+        if (version >= 2) db.execSQL("UPDATE treatments SET follow_up_done_epoch_day = 20300 WHERE id = 7")
+        db.version = version
         db.close()
     }
+
+    private fun open(name: String) = Room.databaseBuilder(context, CicloDatabase::class.java, name)
+        .addMigrations(*CicloDatabase.MIGRATIONS)
+        .allowMainThreadQueries()
+        .build()
 
     @Test
     fun migratingFrom1To2KeepsEveryRowAndLeavesTheFollowUpEmpty() {
         val file = context.getDatabasePath("migration-test.db").also { it.parentFile?.mkdirs(); it.delete() }
-        createVersion1(file)
+        createVersion(1, file)
 
-        val db = Room.databaseBuilder(context, CicloDatabase::class.java, "migration-test.db")
-            .addMigrations(CicloDatabase.MIGRATION_1_2)
-            .allowMainThreadQueries()
-            .build()
+        val db = open("migration-test.db")
         try {
             val treatment = db.treatmentDao().all().single()
             assertEquals(7L, treatment.id)
@@ -65,6 +71,40 @@ class MigrationTest {
             assertNull(treatment.followUpDoneEpochDay)
             assertEquals(3L, db.treatmentDao().allStates().single().delayDays)
             assertEquals("Ana", db.patientDao().all().single().name)
+        } finally {
+            db.close()
+        }
+    }
+
+    @Test
+    fun migratingFrom2To3KeepsEveryRowAndLeavesTheIdentityCardEmpty() {
+        val file = context.getDatabasePath("migration-test-2.db").also { it.parentFile?.mkdirs(); it.delete() }
+        createVersion(2, file)
+
+        val db = open("migration-test-2.db")
+        try {
+            val patient = db.patientDao().all().single()
+            assertEquals("Ana", patient.name)
+            assertEquals("HC-1", patient.clinicalRecordNumber)
+            assertNull(patient.identityCard)
+            assertEquals(20300L, db.treatmentDao().all().single().followUpDoneEpochDay)
+            assertEquals(3L, db.treatmentDao().allStates().single().delayDays)
+        } finally {
+            db.close()
+        }
+    }
+
+    @Test
+    fun afterMigratingTheIdentityCardIsUnique() {
+        val file = context.getDatabasePath("migration-test-3.db").also { it.parentFile?.mkdirs(); it.delete() }
+        createVersion(2, file)
+
+        val db = open("migration-test-3.db")
+        try {
+            db.patientDao().insert(PatientEntity(0, "Beto", "HC-2", null, null, "85010112345"))
+            assertThrows(SQLiteConstraintException::class.java) {
+                db.patientDao().insert(PatientEntity(0, "Carla", "HC-3", null, null, "85010112345"))
+            }
         } finally {
             db.close()
         }

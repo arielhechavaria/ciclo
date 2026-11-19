@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import com.isora.ciclo.agenda.CareSnapshot
 import com.isora.ciclo.protocols.CycleCount
 import com.isora.ciclo.protocols.Protocol
@@ -32,7 +33,7 @@ class PatientListScreenTest {
     private val past = Protocol("AC", Regimen(21, listOf(1)), CycleCount.Fixed(4))
     private val snapshot = CareSnapshot(
         listOf(
-            StoredPatient(PatientId(1), Patient("Ana", "HC-1")),
+            StoredPatient(PatientId(1), Patient("Ana", "HC-1", identityCard = "85010112345")),
             StoredPatient(PatientId(2), Patient("Diana", "HC-2")),
             StoredPatient(PatientId(3), Patient("Berta", "HC-3")),
         ),
@@ -89,5 +90,13 @@ class PatientListScreenTest {
         rule.onNodeWithText("Berta", substring = true).assertIsDisplayed()
         rule.onNodeWithText("revisión el", substring = true).assertIsDisplayed()
         rule.onNodeWithText("Ana", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun searchFindsAPatientByIdentityCard() {
+        show()
+        rule.onNodeWithText("Buscar", substring = true).performTextInput("8501011")
+        rule.onNodeWithText("Ana", substring = true).assertIsDisplayed()
+        rule.onNodeWithText("Diana", substring = true).assertDoesNotExist()
     }
 }

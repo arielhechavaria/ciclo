@@ -1,6 +1,7 @@
 package com.isora.ciclo.storage
 
 import com.isora.ciclo.patients.DuplicateClinicalRecordException
+import com.isora.ciclo.patients.DuplicateIdentityCardException
 import com.isora.ciclo.patients.Patient
 import com.isora.ciclo.patients.PatientId
 import com.isora.ciclo.patients.RoomPatientRepository
@@ -70,5 +71,39 @@ class RoomPatientRepositoryTest : StorageTestBase() {
         }
         repository.update(second.id, Patient("Maria L.", "20999", notes = "nota"))
         assertEquals("nota", repository.findById(second.id)?.patient?.notes)
+    }
+
+    @Test
+    fun identityCardRoundTrips() {
+        val saved = repository.add(Patient("Alberto R.", "10234", identityCard = "85010112345"))
+        assertEquals("85010112345", repository.findById(saved.id)?.patient?.identityCard)
+    }
+
+    @Test
+    fun identityCardIsUniqueAmongPatients() {
+        repository.add(Patient("Alberto R.", "10234", identityCard = "85010112345"))
+        val error = assertThrows(DuplicateIdentityCardException::class.java) {
+            repository.add(Patient("Otra", "20999", identityCard = "85010112345"))
+        }
+        assertEquals("85010112345", error.identityCard)
+        val other = repository.add(Patient("Maria L.", "30111", identityCard = "90020254321"))
+        assertThrows(DuplicateIdentityCardException::class.java) {
+            repository.update(other.id, Patient("Maria L.", "30111", identityCard = "85010112345"))
+        }
+        assertEquals(2, repository.all().size)
+    }
+
+    @Test
+    fun manyPatientsCanHaveNoIdentityCard() {
+        repository.add(Patient("Alberto R.", "10234"))
+        repository.add(Patient("Maria L.", "20999"))
+        assertEquals(2, repository.all().size)
+    }
+
+    @Test
+    fun aPatientKeepsItsOwnIdentityCardWhenUpdated() {
+        val saved = repository.add(Patient("Alberto R.", "10234", identityCard = "85010112345"))
+        repository.update(saved.id, Patient("Alberto Ruiz", "10234", identityCard = "85010112345"))
+        assertEquals("Alberto Ruiz", repository.findById(saved.id)?.patient?.name)
     }
 }

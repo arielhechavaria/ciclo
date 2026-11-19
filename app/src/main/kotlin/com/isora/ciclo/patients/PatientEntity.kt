@@ -9,13 +9,21 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Update
 
-@Entity(tableName = "patients", indices = [Index(value = ["clinical_record_number"], unique = true)])
+@Entity(
+    tableName = "patients",
+    indices = [
+        Index(value = ["clinical_record_number"], unique = true),
+        Index(value = ["identity_card"], unique = true),
+    ],
+)
 data class PatientEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
     @ColumnInfo(name = "clinical_record_number") val clinicalRecordNumber: String,
     val diagnosis: String?,
     val notes: String?,
+    /** Digits only; null when unknown. Unique, and SQLite lets many rows hold null. */
+    @ColumnInfo(name = "identity_card") val identityCard: String? = null,
 )
 
 @Dao

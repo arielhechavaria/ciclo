@@ -45,7 +45,7 @@ fun PatientListScreen(
     today: LocalDate,
     followUpMonths: Int,
     onOpen: (PatientId) -> Unit,
-    onAdd: (Patient, (Boolean) -> Unit) -> Unit,
+    onAdd: (Patient, (PatientConflict?) -> Unit) -> Unit,
 ) {
     var query by remember { mutableStateOf("") }
     var adding by remember { mutableStateOf(false) }
@@ -54,7 +54,8 @@ fun PatientListScreen(
     val matching = snapshot.patients.filter {
         val q = query.trim()
         q.isEmpty() || it.patient.name.contains(q, ignoreCase = true) ||
-            it.patient.clinicalRecordNumber.contains(q, ignoreCase = true)
+            it.patient.clinicalRecordNumber.contains(q, ignoreCase = true) ||
+            it.patient.identityCard?.contains(identityCardKey(q)) == true
     }.sortedBy { it.patient.name.lowercase() }
     val history = matching.filter { snapshot.isHistory(it.id, today) }
     val active = matching - history.toSet()
@@ -113,7 +114,7 @@ fun PatientListScreen(
     if (adding) {
         PatientFormDialog(
             initial = null,
-            onSave = { patient, done -> onAdd(patient) { saved -> if (saved) adding = false; done(saved) } },
+            onSave = { patient, done -> onAdd(patient) { conflict -> if (conflict == null) adding = false; done(conflict) } },
             onCancel = { adding = false },
         )
     }
