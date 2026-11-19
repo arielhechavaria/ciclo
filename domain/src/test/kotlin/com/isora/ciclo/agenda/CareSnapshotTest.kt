@@ -6,6 +6,7 @@ import com.isora.ciclo.patients.StoredPatient
 import com.isora.ciclo.protocols.CycleCount
 import com.isora.ciclo.protocols.Protocol
 import com.isora.ciclo.protocols.Regimen
+import com.isora.ciclo.treatments.SessionRef
 import com.isora.ciclo.treatments.StoredTreatment
 import com.isora.ciclo.treatments.Treatment
 import com.isora.ciclo.treatments.TreatmentId
@@ -47,5 +48,37 @@ class CareSnapshotTest {
     @Test
     fun endDateIsTheDayAfterTheLastCycle() {
         assertEquals(listOf("Ana"), snapshot.finishingBetween(LocalDate.of(2027, 1, 26), LocalDate.of(2027, 1, 27)).map { it.name })
+    }
+
+    private val folfox = Protocol("FOLFOX", Regimen(14, listOf(1)), CycleCount.Fixed(1))
+    private val listed = CareSnapshot(
+        patients + StoredPatient(PatientId(4), Patient("Diana", "HC-4")),
+        treatments.map {
+            if (it.patientId == PatientId(1)) {
+                StoredTreatment(it.id, it.patientId, it.protocolName, it.treatment.postpone(SessionRef(1, 1), LocalDate.of(2026, 11, 5)))
+            } else {
+                it
+            }
+        } + StoredTreatment(TreatmentId(3), PatientId(4), "FOLFOX", Treatment.assign(folfox, LocalDate.of(2026, 11, 10))),
+    )
+
+    @Test
+    fun groupsActiveTreatmentsByProtocolAndLeavesOutFinishedOnes() {
+        val grouped = listed.activeByProtocol(today)
+        assertEquals(listOf("AC", "FOLFOX"), grouped.keys.toList())
+        assertEquals(listOf("Ana"), grouped.getValue("AC").map { it.name })
+        assertEquals(listOf("Diana"), grouped.getValue("FOLFOX").map { it.name })
+    }
+
+    @Test
+    fun postponedListsActiveTreatmentsWithAPostponedSessionNotYetGiven() {
+        assertEquals(listOf("Ana"), listed.postponed(today).map { it.name })
+        assertTrue(snapshot.postponed(today).isEmpty())
+    }
+
+    @Test
+    fun finishingThisMonthListsTreatmentsEndingFromTodayToMonthEnd() {
+        assertEquals(listOf("Diana"), listed.finishingThisMonth(today).map { it.name })
+        assertTrue(listed.finishingThisMonth(LocalDate.of(2026, 11, 25)).isEmpty())
     }
 }

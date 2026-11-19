@@ -52,6 +52,23 @@ class CareSnapshot(val patients: List<StoredPatient>, val treatments: List<Store
         entries.filter { entry -> entry.treatment.treatment.endDate?.let { it >= from && it < toExclusive } == true }
             .sortedBy { it.name.lowercase() }
 
+    /** Running treatments grouped by the protocol name stored at assignment; groups and entries sorted by name. */
+    fun activeByProtocol(today: LocalDate): Map<String, List<AgendaEntry>> =
+        active(today)
+            .groupBy { it.treatment.protocolName }
+            .toSortedMap(String.CASE_INSENSITIVE_ORDER)
+            .mapValues { (_, group) -> group.sortedBy { it.name.lowercase() } }
+
+    /** Running treatments with at least one postponed session that has not been given yet. */
+    fun postponed(today: LocalDate): List<AgendaEntry> =
+        active(today)
+            .filter { entry -> entry.treatment.treatment.sessions().any { it.isPostponed && !it.given } }
+            .sortedBy { it.name.lowercase() }
+
+    /** Treatments ending from [today] to the end of its month. */
+    fun finishingThisMonth(today: LocalDate): List<AgendaEntry> =
+        finishingBetween(today, today.withDayOfMonth(1).plusMonths(1))
+
     /** Entries of until-progression treatments whose reevaluation falls in [from, toExclusive). */
     fun reevaluationBetween(from: LocalDate, toExclusive: LocalDate): List<AgendaEntry> =
         entries.filter { entry ->
