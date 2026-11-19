@@ -33,6 +33,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Same stable key as release, so every dev build installs over the previous one.
+            signingConfigs.findByName("release")?.let { signingConfig = it }
+        }
         release {
             isMinifyEnabled = false
             signingConfig = signingConfigs.findByName("release")
