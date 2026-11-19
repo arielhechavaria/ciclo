@@ -1,6 +1,8 @@
 package com.isora.ciclo.preview
 
 import android.app.Activity
+import android.graphics.Canvas
+import androidx.activity.ComponentActivity
 import android.graphics.Bitmap
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,12 +10,9 @@ import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.test.captureToImage
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.fragment.app.FragmentActivity
 import androidx.test.core.app.ApplicationProvider
@@ -57,7 +56,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 @Config(sdk = [34], qualifiers = "w411dp-h891dp-xxhdpi")
 class ScreenshotPreviewTest {
     @get:Rule
-    val rule = createComposeRule()
+    val rule = createAndroidComposeRule<ComponentActivity>()
 
     // A Wednesday, so the week and month views have sessions before and after it.
     private val today = LocalDate.of(2026, 11, 18)
@@ -98,7 +97,11 @@ class ScreenshotPreviewTest {
     }
 
     private fun capture(name: String) {
-        val bitmap: Bitmap = rule.onRoot().captureToImage().asAndroidBitmap()
+        // captureToImage() waits on a PixelCopy callback that never fires under Robolectric's paused
+        // main looper, so draw the window's decor view into a bitmap instead (native graphics).
+        val decor = rule.activity.window.decorView
+        val bitmap = Bitmap.createBitmap(decor.width, decor.height, Bitmap.Config.ARGB_8888)
+        decor.draw(Canvas(bitmap))
         val dir = File("build/screenshots").apply { mkdirs() }
         File(dir, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         // Guard against silently blank captures: more than one distinct colour must be present.
