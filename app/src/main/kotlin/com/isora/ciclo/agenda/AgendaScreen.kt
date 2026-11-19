@@ -1,5 +1,9 @@
 package com.isora.ciclo.agenda
 
+import com.isora.ciclo.ui.CicloColors
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.foundation.shape.CircleShape
+import com.isora.ciclo.ui.CicloSpacing
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.isora.ciclo.R
 import com.isora.ciclo.patients.PatientId
 import java.time.LocalDate
@@ -32,18 +35,29 @@ private enum class AgendaMode(val label: Int) {
 @Composable
 fun AgendaScreen(snapshot: CareSnapshot, today: LocalDate, onOpenPatient: (PatientId) -> Unit) {
     var mode by remember { mutableStateOf(AgendaMode.LINE) }
-    Column(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+    Column(Modifier.fillMaxSize().padding(horizontal = CicloSpacing.md)) {
         Text(
             stringResource(R.string.agenda_title),
             style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(vertical = 16.dp),
+            modifier = Modifier.padding(vertical = CicloSpacing.md),
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(bottom = 12.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(CicloSpacing.xs), modifier = Modifier.padding(bottom = CicloSpacing.sm)) {
             AgendaMode.values().forEach { option ->
                 FilterChip(
                     selected = mode == option,
                     onClick = { mode = option },
                     label = { Text(stringResource(option.label)) },
+                    shape = CircleShape,
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = CicloColors.primary,
+                        selectedLabelColor = CicloColors.onPrimary,
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        enabled = true,
+                        selected = mode == option,
+                        borderColor = CicloColors.hairline,
+                        selectedBorderColor = CicloColors.primary,
+                    ),
                 )
             }
         }

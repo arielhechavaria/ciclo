@@ -1,5 +1,6 @@
 package com.isora.ciclo
 
+import com.isora.ciclo.ui.CicloColors
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -83,7 +84,7 @@ fun CicloApp(container: AppContainer, pins: PinStore, onLockNow: () -> Unit) {
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
+            NavigationBar(containerColor = CicloColors.canvas) {
                 Tab.values().forEach { entry ->
                     NavigationBarItem(
                         selected = tab == entry,

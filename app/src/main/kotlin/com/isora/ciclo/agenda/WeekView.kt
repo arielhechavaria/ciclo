@@ -1,5 +1,7 @@
 package com.isora.ciclo.agenda
 
+import com.isora.ciclo.ui.CicloSpacing
+import com.isora.ciclo.ui.CicloCard
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -19,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.isora.ciclo.R
 import com.isora.ciclo.patients.PatientId
 import com.isora.ciclo.ui.CicloPalette
@@ -50,14 +50,14 @@ fun WeekView(snapshot: CareSnapshot, today: LocalDate, onOpenPatient: (PatientId
                 day.formatShort(),
                 style = MaterialTheme.typography.titleMedium,
                 color = if (day == today) CicloPalette.today else MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+                modifier = Modifier.padding(top = CicloSpacing.sm, bottom = CicloSpacing.xxs),
             )
             if (daySessions.isEmpty() && dayFinishing.isEmpty()) {
                 Text(stringResource(R.string.week_no_sessions), style = MaterialTheme.typography.bodySmall)
             }
             daySessions.forEach { item ->
-                Card(Modifier.fillMaxWidth().padding(vertical = 2.dp).clickable { onOpenPatient(item.entry.patient.id) }) {
-                    Column(Modifier.padding(12.dp)) {
+                CicloCard(Modifier.fillMaxWidth().padding(vertical = CicloSpacing.xxs).clickable { onOpenPatient(item.entry.patient.id) }) {
+                    Column(Modifier.padding(CicloSpacing.lg)) {
                         Text(item.entry.name, style = MaterialTheme.typography.titleSmall)
                         Text(
                             stringResource(R.string.week_session_line, item.session.ref.cycle, item.session.ref.session),
@@ -73,8 +73,8 @@ fun WeekView(snapshot: CareSnapshot, today: LocalDate, onOpenPatient: (PatientId
                 }
             }
             dayFinishing.forEach { entry ->
-                Card(Modifier.fillMaxWidth().padding(vertical = 2.dp).clickable { onOpenPatient(entry.patient.id) }) {
-                    Column(Modifier.padding(12.dp)) {
+                CicloCard(Modifier.fillMaxWidth().padding(vertical = CicloSpacing.xxs).clickable { onOpenPatient(entry.patient.id) }) {
+                    Column(Modifier.padding(CicloSpacing.lg)) {
                         Text(entry.name, style = MaterialTheme.typography.titleSmall)
                         Text(stringResource(R.string.flag_finishing), color = CicloPalette.lastSession, style = MaterialTheme.typography.labelMedium)
                     }

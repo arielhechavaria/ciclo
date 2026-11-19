@@ -1,5 +1,7 @@
 package com.isora.ciclo.security
 
+import com.isora.ciclo.ui.CicloSpacing
+import com.isora.ciclo.ui.CicloTextField
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.layout.Arrangement
@@ -10,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,7 +25,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
@@ -83,16 +83,16 @@ fun LockScreen(pins: PinStore, onUnlocked: () -> Unit) {
     }
 
     Column(
-        Modifier.fillMaxSize().padding(32.dp),
+        Modifier.fillMaxSize().padding(CicloSpacing.xxl),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(stringResource(R.string.app_name), style = MaterialTheme.typography.displaySmall)
         Text(
             stringResource(if (creating) R.string.lock_create_title else R.string.lock_enter_title),
-            Modifier.padding(vertical = 16.dp),
+            Modifier.padding(vertical = CicloSpacing.md),
         )
-        OutlinedTextField(
+        CicloTextField(
             value = pin,
             onValueChange = { if (it.length <= PinStore.MAX_LENGTH && it.all(Char::isDigit)) pin = it; error = null },
             label = { Text(stringResource(R.string.lock_pin)) },
@@ -102,23 +102,23 @@ fun LockScreen(pins: PinStore, onUnlocked: () -> Unit) {
             modifier = Modifier.fillMaxWidth(),
         )
         if (creating) {
-            OutlinedTextField(
+            CicloTextField(
                 value = confirm,
                 onValueChange = { if (it.length <= PinStore.MAX_LENGTH && it.all(Char::isDigit)) confirm = it; error = null },
                 label = { Text(stringResource(R.string.lock_pin_confirm)) },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = CicloSpacing.xs),
             )
-            Text(stringResource(R.string.lock_no_recovery), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.bodySmall)
+            Text(stringResource(R.string.lock_no_recovery), Modifier.padding(top = CicloSpacing.xs), style = MaterialTheme.typography.bodySmall)
         }
-        error?.let { Text(stringResource(it), color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp)) }
-        Button(onClick = ::submit, Modifier.fillMaxWidth().padding(top = 16.dp)) {
+        error?.let { Text(stringResource(it), color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = CicloSpacing.xs)) }
+        Button(onClick = ::submit, Modifier.fillMaxWidth().padding(top = CicloSpacing.md)) {
             Text(stringResource(if (creating) R.string.lock_create_button else R.string.lock_unlock))
         }
         if (!creating && fingerprintAvailable()) {
-            OutlinedButton(onClick = ::promptFingerprint, Modifier.fillMaxWidth().padding(top = 8.dp)) {
+            OutlinedButton(onClick = ::promptFingerprint, Modifier.fillMaxWidth().padding(top = CicloSpacing.xs)) {
                 Text(stringResource(R.string.lock_use_fingerprint))
             }
         }

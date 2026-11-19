@@ -1,5 +1,7 @@
 package com.isora.ciclo.agenda
 
+import com.isora.ciclo.ui.CicloColors
+import com.isora.ciclo.ui.CicloSpacing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -85,11 +87,11 @@ fun MonthView(snapshot: CareSnapshot, today: LocalDate, onOpenPatient: (PatientI
             Text(
                 day.formatShort(),
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
+                modifier = Modifier.padding(top = CicloSpacing.md, bottom = CicloSpacing.xxs),
             )
             if (list.isEmpty()) Text(stringResource(R.string.week_no_sessions), style = MaterialTheme.typography.bodySmall)
             list.forEach { item ->
-                Column(Modifier.fillMaxWidth().clickable { onOpenPatient(item.entry.patient.id) }.padding(vertical = 6.dp)) {
+                Column(Modifier.fillMaxWidth().clickable { onOpenPatient(item.entry.patient.id) }.padding(vertical = CicloSpacing.xs)) {
                     Text(item.entry.name, style = MaterialTheme.typography.titleSmall)
                     Text(
                         stringResource(R.string.week_session_line, item.session.ref.cycle, item.session.ref.session),
@@ -117,18 +119,18 @@ private fun DayCell(
         else -> Color.Transparent
     }
     Box(
-        modifier.aspectRatio(1f).padding(2.dp).border(1.dp, outline, CircleShape).clickable(onClick = onClick),
+        modifier.aspectRatio(1f).padding(CicloSpacing.xxs).border(1.dp, outline, CircleShape).clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 day.dayOfMonth.toString(),
                 style = MaterialTheme.typography.bodyMedium,
-                color = if (inMonth) MaterialTheme.colorScheme.onSurface else Color.Gray,
+                color = if (inMonth) MaterialTheme.colorScheme.onSurface else CicloColors.muted,
             )
             if (count > 0) {
-                Box(Modifier.background(CicloPalette.session, CircleShape).padding(horizontal = 6.dp)) {
-                    Text(count.toString(), color = Color.White, style = MaterialTheme.typography.labelSmall)
+                Box(Modifier.background(CicloPalette.session, CircleShape).padding(horizontal = CicloSpacing.xs)) {
+                    Text(count.toString(), color = CicloColors.onPrimary, style = MaterialTheme.typography.labelSmall)
                 }
             }
         }

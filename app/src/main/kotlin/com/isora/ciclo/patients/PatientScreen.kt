@@ -1,5 +1,8 @@
 package com.isora.ciclo.patients
 
+import com.isora.ciclo.ui.CicloSpacing
+import com.isora.ciclo.ui.CicloTextField
+import com.isora.ciclo.ui.CicloCard
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,10 +12,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -23,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.isora.ciclo.R
 import com.isora.ciclo.protocols.CatalogProtocol
 import com.isora.ciclo.protocols.CycleCount
@@ -55,13 +55,13 @@ fun PatientScreen(
     var editing by remember { mutableStateOf(false) }
     var assigning by remember { mutableStateOf(false) }
 
-    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp)) {
+    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(CicloSpacing.md)) {
         TextButton(onClick = onBack) { Text(stringResource(R.string.back)) }
         Text(patient.patient.name, style = MaterialTheme.typography.headlineMedium)
         Text(stringResource(R.string.patient_record_line, patient.patient.clinicalRecordNumber))
         patient.patient.diagnosis?.let { Text(it) }
         patient.patient.notes?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
-        Row(Modifier.padding(vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(Modifier.padding(vertical = CicloSpacing.xs), horizontalArrangement = Arrangement.spacedBy(CicloSpacing.xs)) {
             OutlinedButton(onClick = { editing = true }) { Text(stringResource(R.string.protocol_edit)) }
             Button(onClick = { assigning = true }) { Text(stringResource(R.string.assign_title)) }
         }
@@ -102,8 +102,8 @@ private fun TreatmentCard(stored: StoredTreatment, today: LocalDate, onChange: (
     val next = treatment.sessions().firstOrNull { !it.given }
     val total = treatment.totalCycles
 
-    Card(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-        Column(Modifier.padding(16.dp)) {
+    CicloCard(Modifier.fillMaxWidth().padding(vertical = CicloSpacing.xs)) {
+        Column(Modifier.padding(CicloSpacing.lg)) {
             Text(stored.protocolName, style = MaterialTheme.typography.titleLarge)
             if (next != null) {
                 val progress = if (total != null) {
@@ -132,7 +132,7 @@ private fun TreatmentCard(stored: StoredTreatment, today: LocalDate, onChange: (
                 Text(
                     stringResource(R.string.cycle_header, cycle.number, cycle.start.formatShort()),
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(top = 12.dp),
+                    modifier = Modifier.padding(top = CicloSpacing.sm),
                 )
                 cycle.sessions.forEach { session ->
                     SessionRow(
@@ -150,7 +150,7 @@ private fun TreatmentCard(stored: StoredTreatment, today: LocalDate, onChange: (
                 TextButton(onClick = { shownCycles += CYCLES_PER_PAGE }) { Text(stringResource(R.string.show_more_cycles)) }
             }
             if (treatment.earlyFinish == null) {
-                OutlinedButton(onClick = { finishing = true }, Modifier.padding(top = 12.dp)) {
+                OutlinedButton(onClick = { finishing = true }, Modifier.padding(top = CicloSpacing.sm)) {
                     Text(stringResource(R.string.finish_early))
                 }
             }
@@ -198,11 +198,11 @@ private fun SessionRow(session: ScheduledSession, finished: Boolean, onGiven: ()
         session.isPostponed -> stringResource(R.string.status_postponed, session.postponedFrom!!.formatShort())
         else -> stringResource(R.string.status_planned)
     }
-    Column(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+    Column(Modifier.fillMaxWidth().padding(vertical = CicloSpacing.xxs)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 stringResource(R.string.session_line, session.ref.session, session.date.formatShort()),
-                Modifier.padding(end = 8.dp),
+                Modifier.padding(end = CicloSpacing.xs),
             )
             if (session.isLast) {
                 Text(stringResource(R.string.last_session), color = CicloPalette.lastSession, style = MaterialTheme.typography.labelLarge)
@@ -210,7 +210,7 @@ private fun SessionRow(session: ScheduledSession, finished: Boolean, onGiven: ()
         }
         Text(statusText, style = MaterialTheme.typography.bodySmall, color = if (session.isPostponed) CicloPalette.postponed else MaterialTheme.colorScheme.secondary)
         if (!session.given && !finished) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(CicloSpacing.xs)) {
                 OutlinedButton(onClick = onGiven) { Text(stringResource(R.string.mark_given)) }
                 OutlinedButton(onClick = onPostpone) { Text(stringResource(R.string.mark_postponed)) }
             }
@@ -227,11 +227,11 @@ private fun FinishEarlyDialog(today: LocalDate, onConfirm: (String) -> Unit, onC
         text = {
             Column {
                 Text(stringResource(R.string.finish_early_hint, today.formatLong()))
-                OutlinedTextField(
+                CicloTextField(
                     value = reason,
                     onValueChange = { reason = it },
                     label = { Text(stringResource(R.string.finish_early_reason)) },
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = CicloSpacing.xs),
                 )
             }
         },
