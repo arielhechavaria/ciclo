@@ -66,6 +66,11 @@
     <string name="patients_add">Añadir paciente</string>
     <string name="patients_search">Buscar por nombre o nº de historia</string>
     <string name="patients_empty">No hay pacientes.</string>
+    <string name="patients_filter_all">Todos</string>
+    <string name="patients_filter_protocol">Por protocolo</string>
+    <string name="patients_filter_postponed">Pospuestos</string>
+    <string name="patients_filter_finishing">Terminan este mes</string>
+    <string name="patients_filter_empty">Ningún paciente en esta lista.</string>
     <string name="patients_history">Historial</string>
     <string name="patient_no_treatment">Sin tratamiento</string>
     <string name="patient_finished_on">terminó el %1$s</string>
