@@ -62,10 +62,6 @@ android {
         buildConfig = true
         compose = true
     }
-    sourceSets {
-        // The committed Room schemas let the migration test open a database as an older version created it.
-        getByName("test").assets.srcDir("$projectDir/schemas")
-    }
     testOptions {
         unitTests.isIncludeAndroidResources = true
         // Robolectric with Compose needs more than the 512 MB default heap of the test JVM.
@@ -95,7 +91,6 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.robolectric:robolectric:4.12.2")
     testImplementation("androidx.test:core:1.5.0")
-    testImplementation("androidx.room:room-testing:2.6.1")
     testImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
