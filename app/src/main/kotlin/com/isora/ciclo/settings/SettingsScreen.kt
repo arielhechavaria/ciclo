@@ -40,6 +40,8 @@ import com.isora.ciclo.backup.BackupService
 import com.isora.ciclo.notifications.FridayNotifier
 import com.isora.ciclo.security.LockGuard
 import com.isora.ciclo.security.PinStore
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import java.time.format.DateTimeFormatter
 
 private val timeFormat = DateTimeFormatter.ofPattern("HH:mm")
@@ -58,6 +60,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     var enabled by remember { mutableStateOf(settings.fridayEnabled) }
     var timeText by remember { mutableStateOf(settings.fridayTime.format(timeFormat)) }
+    var monthsText by remember { mutableStateOf(settings.followUpMonths.toString()) }
     var timeError by remember { mutableStateOf(false) }
     var timeSaved by remember { mutableStateOf(false) }
     var fingerprint by remember { mutableStateOf(pins.fingerprintEnabled) }
@@ -118,6 +121,22 @@ fun SettingsScreen(
             },
             modifier = Modifier.padding(top = CicloSpacing.xxs),
         ) { Text(stringResource(R.string.protocol_form_save)) }
+
+        Text(stringResource(R.string.settings_follow_up), Modifier.padding(top = CicloSpacing.xl), style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.settings_follow_up_hint), style = MaterialTheme.typography.bodySmall)
+        CicloTextField(
+            value = monthsText,
+            onValueChange = {
+                monthsText = it.filter(Char::isDigit).take(2)
+                val months = monthsText.toIntOrNull()
+                if (months != null && months in AppSettings.FOLLOW_UP_MONTHS_RANGE) settings.followUpMonths = months
+            },
+            label = { Text(stringResource(R.string.settings_follow_up_months)) },
+            isError = monthsText.toIntOrNull()?.let { it !in AppSettings.FOLLOW_UP_MONTHS_RANGE } ?: true,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.fillMaxWidth(),
+        )
 
         Text(stringResource(R.string.settings_reliability), Modifier.padding(top = CicloSpacing.xl), style = MaterialTheme.typography.titleMedium)
         Text(stringResource(R.string.settings_reliability_hint), style = MaterialTheme.typography.bodySmall)

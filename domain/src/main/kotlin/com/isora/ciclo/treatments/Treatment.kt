@@ -50,6 +50,8 @@ class Treatment(
     val postponements: Map<SessionRef, Long> = emptyMap(),
     val givenSessions: Set<SessionRef> = emptySet(),
     val earlyFinish: EarlyFinish? = null,
+    /** The day the post-treatment follow-up review was done; null while pending. */
+    val followUpDoneOn: LocalDate? = null,
 ) {
     val totalCycles: Int? get() = (cycleCount as? CycleCount.Fixed)?.cycles
 
@@ -90,6 +92,11 @@ class Treatment(
         require(!date.isBefore(startDate)) { "The finish date cannot be before the start date" }
         return copy(earlyFinish = EarlyFinish(date, reason.trim()))
     }
+
+    /** When the follow-up review is due: [months] after the end date; null while the treatment has no end. */
+    fun followUpDate(months: Int): LocalDate? = endDate?.plusMonths(months.toLong())
+
+    fun markFollowUpDone(date: LocalDate): Treatment = copy(followUpDoneOn = date)
 
     fun isFinishedOn(date: LocalDate): Boolean = endDate?.let { !date.isBefore(it) } ?: false
 
@@ -136,7 +143,8 @@ class Treatment(
         postponements: Map<SessionRef, Long> = this.postponements,
         givenSessions: Set<SessionRef> = this.givenSessions,
         earlyFinish: EarlyFinish? = this.earlyFinish,
-    ) = Treatment(regimen, cycleCount, startDate, postponements, givenSessions, earlyFinish)
+        followUpDoneOn: LocalDate? = this.followUpDoneOn,
+    ) = Treatment(regimen, cycleCount, startDate, postponements, givenSessions, earlyFinish, followUpDoneOn)
 
     companion object {
         fun assign(

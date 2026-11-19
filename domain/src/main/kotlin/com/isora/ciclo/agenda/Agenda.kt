@@ -13,6 +13,9 @@ data class AgendaEntry(val patient: StoredPatient, val treatment: StoredTreatmen
     val name: String get() = patient.patient.name
 }
 
+/** A finished treatment whose follow-up review is still pending, due on [dueOn]. */
+data class FollowUp(val entry: AgendaEntry, val dueOn: LocalDate)
+
 data class AgendaSession(val entry: AgendaEntry, val session: ScheduledSession)
 
 /** Everything the views need: all patients and all their treatments. */
@@ -68,6 +71,12 @@ class CareSnapshot(val patients: List<StoredPatient>, val treatments: List<Store
     /** Treatments ending from [today] to the end of its month. */
     fun finishingThisMonth(today: LocalDate): List<AgendaEntry> =
         finishingBetween(today, today.withDayOfMonth(1).plusMonths(1))
+
+    /** Finished treatments whose follow-up review is not done yet, earliest due date first. */
+    fun followUps(today: LocalDate, months: Int): List<FollowUp> =
+        entries.filter { it.treatment.treatment.isFinishedOn(today) && it.treatment.treatment.followUpDoneOn == null }
+            .mapNotNull { entry -> entry.treatment.treatment.followUpDate(months)?.let { FollowUp(entry, it) } }
+            .sortedWith(compareBy({ it.dueOn }, { it.entry.name.lowercase() }))
 
     /** Entries of until-progression treatments whose reevaluation falls in [from, toExclusive). */
     fun reevaluationBetween(from: LocalDate, toExclusive: LocalDate): List<AgendaEntry> =

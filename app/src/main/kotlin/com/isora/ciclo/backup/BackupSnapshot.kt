@@ -31,6 +31,7 @@ data class BackupSnapshot(
             treatments.forEach {
                 LocalDate.ofEpochDay(it.startEpochDay)
                 it.finishEpochDay?.let(LocalDate::ofEpochDay)
+                it.followUpDoneEpochDay?.let(LocalDate::ofEpochDay)
             }
             protocols.forEach { regimenOf(it.cycleLengthDays, it.sessionDays); cycleCountOf(it.cycleMode, it.cycleValue) }
             treatments.forEach { regimenOf(it.cycleLengthDays, it.sessionDays); cycleCountOf(it.cycleMode, it.cycleValue) }
@@ -69,6 +70,7 @@ object BackupJson {
                 .put("startEpochDay", it.startEpochDay)
                 .put("finishEpochDay", it.finishEpochDay ?: JSONObject.NULL)
                 .put("finishReason", it.finishReason ?: JSONObject.NULL)
+                .put("followUpDoneEpochDay", it.followUpDoneEpochDay ?: JSONObject.NULL)
         }))
         .put("sessionStates", JSONArray(snapshot.sessionStates.map {
             JSONObject().put("treatmentId", it.treatmentId).put("cycle", it.cycle).put("session", it.session)
@@ -107,6 +109,8 @@ object BackupJson {
                         startEpochDay = it.getLong("startEpochDay"),
                         finishEpochDay = if (it.isNull("finishEpochDay")) null else it.getLong("finishEpochDay"),
                         finishReason = it.text("finishReason"),
+                        // Absent in backups made before follow-up existed.
+                        followUpDoneEpochDay = if (it.isNull("followUpDoneEpochDay")) null else it.getLong("followUpDoneEpochDay"),
                     )
                 },
                 sessionStates = root.getJSONArray("sessionStates").objects().map {

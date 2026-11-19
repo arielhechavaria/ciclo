@@ -19,7 +19,17 @@ class AppSettings(context: Context) {
             prefs.edit().putInt("friday_hour", value.hour).putInt("friday_minute", value.minute).apply()
         }
 
+    /** Months after the end of a treatment when the follow-up review is due. */
+    var followUpMonths: Int
+        get() = prefs.getInt("follow_up_months", DEFAULT_FOLLOW_UP_MONTHS).coerceIn(FOLLOW_UP_MONTHS_RANGE)
+        set(value) {
+            prefs.edit().putInt("follow_up_months", value.coerceIn(FOLLOW_UP_MONTHS_RANGE)).apply()
+        }
+
     companion object {
+        const val DEFAULT_FOLLOW_UP_MONTHS = 3
+        val FOLLOW_UP_MONTHS_RANGE = 1..24
+
         /** Parses "H:mm" or "HH:mm"; null when it is not a valid time of day. */
         fun parseTime(text: String): LocalTime? {
             val parts = text.trim().split(':')

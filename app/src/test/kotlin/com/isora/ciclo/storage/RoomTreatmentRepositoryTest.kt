@@ -145,4 +145,15 @@ class RoomTreatmentRepositoryTest : StorageTestBase() {
         db.openHelper.writableDatabase.execSQL("DELETE FROM treatments WHERE id = ${stored.id.value}")
         assertEquals(0, db.query("SELECT * FROM session_states", null).use { it.count })
     }
+
+    @Test
+    fun theFollowUpMarkIsPersistedAndStartsEmpty() {
+        val patient = patients.add(Patient("Alberto R.", "10234"))
+        val stored = treatments.assign(patient.id, ac.name, Treatment.assign(ac, start))
+        assertNull(treatments.findById(stored.id)!!.treatment.followUpDoneOn)
+
+        treatments.save(stored.copy(treatment = stored.treatment.markFollowUpDone(LocalDate.of(2027, 4, 28))))
+
+        assertEquals(LocalDate.of(2027, 4, 28), treatments.findById(stored.id)!!.treatment.followUpDoneOn)
+    }
 }

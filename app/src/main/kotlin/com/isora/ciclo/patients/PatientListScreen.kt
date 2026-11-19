@@ -35,6 +35,7 @@ enum class PatientFilter(val label: Int) {
     BY_PROTOCOL(R.string.patients_filter_protocol),
     POSTPONED(R.string.patients_filter_postponed),
     FINISHING(R.string.patients_filter_finishing),
+    FOLLOW_UP(R.string.patients_filter_follow_up),
 }
 
 /** Active patients first, then the history of those whose treatments finished; searchable. */
@@ -42,6 +43,7 @@ enum class PatientFilter(val label: Int) {
 fun PatientListScreen(
     snapshot: CareSnapshot,
     today: LocalDate,
+    followUpMonths: Int,
     onOpen: (PatientId) -> Unit,
     onAdd: (Patient, (Boolean) -> Unit) -> Unit,
 ) {
@@ -88,7 +90,7 @@ fun PatientListScreen(
                 }
             }
             if (filter != PatientFilter.ALL) {
-                FilteredList(filter, snapshot, today, matching.toSet(), onOpen)
+                FilteredList(filter, snapshot, today, followUpMonths, matching.toSet(), onOpen)
                 return@Column
             }
             LazyColumn(Modifier.padding(top = CicloSpacing.xs)) {
@@ -122,10 +124,15 @@ private fun FilteredList(
     filter: PatientFilter,
     snapshot: CareSnapshot,
     today: LocalDate,
+    followUpMonths: Int,
     allowed: Set<StoredPatient>,
     onOpen: (PatientId) -> Unit,
 ) {
     fun List<AgendaEntry>.visible() = filter { it.patient in allowed }
+    if (filter == PatientFilter.FOLLOW_UP) {
+        FollowUpList(snapshot, today, followUpMonths, allowed, onOpen)
+        return
+    }
     val groups: Map<String?, List<AgendaEntry>> = when (filter) {
         PatientFilter.BY_PROTOCOL -> snapshot.activeByProtocol(today).mapValues { it.value.visible() }.filterValues { it.isNotEmpty() }
         PatientFilter.POSTPONED -> snapshot.postponed(today).visible().let { if (it.isEmpty()) emptyMap() else mapOf(null to it) }
@@ -145,6 +152,30 @@ private fun FilteredList(
             }
             items(entries, key = { "${filter.name}${title}${it.treatment.id.value}" }) { entry ->
                 PatientRow(entry.patient, snapshot, today, onOpen)
+            }
+        }
+    }
+}
+
+@Composable
+private fun FollowUpList(
+    snapshot: CareSnapshot,
+    today: LocalDate,
+    followUpMonths: Int,
+    allowed: Set<StoredPatient>,
+    onOpen: (PatientId) -> Unit,
+) {
+    val due = snapshot.followUps(today, followUpMonths).filter { it.entry.patient in allowed }
+    LazyColumn {
+        if (due.isEmpty()) item { Text(stringResource(R.string.patients_filter_empty)) }
+        items(due, key = { "f${it.entry.treatment.id.value}" }) { followUp ->
+            Column(Modifier.fillMaxWidth().clickable { onOpen(followUp.entry.patient.id) }.padding(vertical = CicloSpacing.xs)) {
+                Text(followUp.entry.name, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    "${followUp.entry.patient.patient.clinicalRecordNumber} · " +
+                        stringResource(R.string.patients_follow_up_due, followUp.dueOn.formatLong()),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
             }
         }
     }
