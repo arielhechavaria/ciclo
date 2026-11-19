@@ -15,6 +15,9 @@ android {
         // The release workflow sets these from the git tag and the run number.
         versionCode = System.getenv("CICLO_VERSION_CODE")?.toInt() ?: 1
         versionName = System.getenv("CICLO_VERSION_NAME") ?: "0.1.0-dev"
+        // Until the first public release the app ships with fictional patients to exercise every feature.
+        // Set to false (or remove) before releasing to real users.
+        buildConfigField("boolean", "MOCK_DATA", "true")
     }
 
     // Stable release key so every new APK installs over the previous one.
@@ -51,6 +54,7 @@ android {
         jvmTarget = "17"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
     testOptions {

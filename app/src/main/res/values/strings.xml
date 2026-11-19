@@ -121,6 +121,10 @@
     <string name="settings_change_pin">Cambiar PIN</string>
     <string name="settings_pin_changed">PIN cambiado</string>
     <string name="settings_lock_now">Bloquear ahora</string>
+    <string name="settings_mock">Datos de prueba</string>
+    <string name="settings_mock_hint">Pacientes ficticios que cubren todas las funciones. Solo en las versiones de prueba, antes del lanzamiento público.</string>
+    <string name="settings_mock_load">Cargar datos de prueba</string>
+    <string name="settings_mock_loaded">Datos de prueba cargados</string>
 
     <string name="lock_create_title">Crea un PIN para proteger los datos</string>
     <string name="lock_enter_title">Escribe tu PIN</string>

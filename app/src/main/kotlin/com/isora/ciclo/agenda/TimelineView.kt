@@ -1,6 +1,7 @@
 package com.isora.ciclo.agenda
 
 import com.isora.ciclo.ui.CicloColors
+import com.isora.ciclo.ui.CicloSpacing
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -139,7 +140,7 @@ fun TimelineView(snapshot: CareSnapshot, today: LocalDate, onOpenPatient: (Patie
 
 @Composable
 private fun Legend() {
-    Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)) {
+    Row(Modifier.fillMaxWidth().padding(vertical = CicloSpacing.xs), horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(CicloSpacing.sm)) {
         LegendItem(CicloPalette.cycle, R.string.legend_cycle)
         LegendItem(CicloPalette.session, R.string.legend_session)
         LegendItem(CicloPalette.lastSession, R.string.legend_last)
@@ -151,6 +152,6 @@ private fun Legend() {
 private fun LegendItem(color: Color, label: Int) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(10.dp).background(color, CircleShape))
-        Text(stringResource(label), Modifier.padding(start = 4.dp), style = MaterialTheme.typography.labelSmall)
+        Text(stringResource(label), Modifier.padding(start = CicloSpacing.xxs), style = MaterialTheme.typography.labelSmall)
     }
 }

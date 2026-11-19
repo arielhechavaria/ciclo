@@ -43,7 +43,7 @@ private val timeFormat = DateTimeFormatter.ofPattern("HH:mm")
 
 /** Friday notification (switch, time, the permissions it needs on old phones) and the lock. */
 @Composable
-fun SettingsScreen(settings: AppSettings, pins: PinStore, onLockNow: () -> Unit) {
+fun SettingsScreen(settings: AppSettings, pins: PinStore, onLockNow: () -> Unit, onLoadMock: (() -> Unit)? = null) {
     val context = LocalContext.current
     var enabled by remember { mutableStateOf(settings.fridayEnabled) }
     var timeText by remember { mutableStateOf(settings.fridayTime.format(timeFormat)) }
@@ -52,6 +52,7 @@ fun SettingsScreen(settings: AppSettings, pins: PinStore, onLockNow: () -> Unit)
     var fingerprint by remember { mutableStateOf(pins.fingerprintEnabled) }
     var newPin by remember { mutableStateOf("") }
     var pinMessage by remember { mutableStateOf<Int?>(null) }
+    var mockLoaded by remember { mutableStateOf(false) }
 
     val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
         FridayNotifier.schedule(context)
@@ -171,6 +172,19 @@ fun SettingsScreen(settings: AppSettings, pins: PinStore, onLockNow: () -> Unit)
         ) { Text(stringResource(R.string.settings_change_pin)) }
         Button(onClick = onLockNow, Modifier.fillMaxWidth().padding(top = CicloSpacing.md)) {
             Text(stringResource(R.string.settings_lock_now))
+        }
+
+        if (onLoadMock != null) {
+            Text(stringResource(R.string.settings_mock), Modifier.padding(top = CicloSpacing.xl), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.settings_mock_hint), style = MaterialTheme.typography.bodySmall)
+            OutlinedButton(
+                onClick = {
+                    onLoadMock()
+                    mockLoaded = true
+                },
+                modifier = Modifier.fillMaxWidth().padding(top = CicloSpacing.xs),
+            ) { Text(stringResource(R.string.settings_mock_load)) }
+            if (mockLoaded) Text(stringResource(R.string.settings_mock_loaded), style = MaterialTheme.typography.bodySmall)
         }
     }
 }
