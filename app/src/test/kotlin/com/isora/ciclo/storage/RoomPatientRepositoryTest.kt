@@ -2,6 +2,7 @@ package com.isora.ciclo.storage
 
 import com.isora.ciclo.patients.DuplicateClinicalRecordException
 import com.isora.ciclo.patients.Patient
+import com.isora.ciclo.patients.PatientId
 import com.isora.ciclo.patients.RoomPatientRepository
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -32,6 +33,14 @@ class RoomPatientRepositoryTest : StorageTestBase() {
         }
         assertEquals("10234", error.clinicalRecordNumber)
         assertEquals(1, repository.all().size)
+    }
+
+    @Test
+    fun updatingAMissingPatientFailsInsteadOfDoingNothing() {
+        assertThrows(NoSuchElementException::class.java) {
+            repository.update(PatientId(999), Patient("Nadie", "00000"))
+        }
+        assertEquals(0, repository.all().size)
     }
 
     @Test

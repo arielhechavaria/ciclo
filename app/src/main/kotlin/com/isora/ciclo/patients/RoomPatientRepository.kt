@@ -18,11 +18,12 @@ class RoomPatientRepository(private val dao: PatientDao) : PatientRepository {
     }
 
     override fun update(id: PatientId, patient: Patient) {
-        try {
+        val changed = try {
             dao.update(patient.toEntity(id.value))
         } catch (e: SQLiteConstraintException) {
             throw DuplicateClinicalRecordException(patient.clinicalRecordNumber)
         }
+        if (changed == 0) throw NoSuchElementException("Patient ${id.value} does not exist")
     }
 }
 

@@ -27,7 +27,8 @@ class RoomProtocolCatalog(private val dao: ProtocolDao) : ProtocolCatalog {
     }
 
     override fun update(id: ProtocolId, protocol: Protocol) {
-        val current = dao.all().first { it.id == id.value }
+        val current = dao.all().firstOrNull { it.id == id.value }
+            ?: throw NoSuchElementException("Protocol ${id.value} does not exist")
         try {
             dao.update(protocol.toEntity(id = id.value, archived = current.archived))
         } catch (e: SQLiteConstraintException) {

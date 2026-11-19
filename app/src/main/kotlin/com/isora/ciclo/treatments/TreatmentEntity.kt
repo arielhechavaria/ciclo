@@ -83,8 +83,9 @@ abstract class TreatmentDao {
     @Insert
     abstract fun insertStates(states: List<SessionStateEntity>)
 
+    /** Returns how many rows changed: 0 when the id does not exist. */
     @Update
-    abstract fun update(entity: TreatmentEntity)
+    abstract fun update(entity: TreatmentEntity): Int
 
     @Query("DELETE FROM session_states WHERE treatment_id = :treatmentId")
     abstract fun deleteStates(treatmentId: Long)
@@ -98,7 +99,8 @@ abstract class TreatmentDao {
 
     @Transaction
     open fun replace(entity: TreatmentEntity, states: List<SessionStateEntity>) {
-        update(entity)
+        // Throwing inside the transaction rolls everything back.
+        if (update(entity) == 0) throw NoSuchElementException("Treatment ${entity.id} does not exist")
         deleteStates(entity.id)
         insertStates(states)
     }

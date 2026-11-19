@@ -2,11 +2,13 @@ package com.isora.ciclo.storage
 
 import com.isora.ciclo.protocols.CycleCount
 import com.isora.ciclo.protocols.Protocol
+import com.isora.ciclo.protocols.ProtocolId
 import com.isora.ciclo.protocols.ProtocolSeed
 import com.isora.ciclo.protocols.Regimen
 import com.isora.ciclo.protocols.RoomProtocolCatalog
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -35,6 +37,14 @@ class RoomProtocolCatalogTest : StorageTestBase() {
         val b = catalog.add(gemCis)
         assertEquals(listOf(untilProgression, gemCis), catalog.all().map { it.protocol })
         assertEquals(listOf(a.id, b.id), catalog.all().map { it.id })
+    }
+
+    @Test
+    fun updatingAMissingProtocolFailsWithAClearError() {
+        val error = assertThrows(NoSuchElementException::class.java) {
+            catalog.update(ProtocolId(999), Protocol("AC", Regimen(21, listOf(1)), CycleCount.Fixed(4)))
+        }
+        assertEquals("Protocol 999 does not exist", error.message)
     }
 
     @Test
