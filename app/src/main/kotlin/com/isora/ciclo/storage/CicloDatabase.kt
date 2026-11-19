@@ -15,10 +15,13 @@ import com.isora.ciclo.treatments.SessionStateEntity
 import com.isora.ciclo.treatments.TreatmentDao
 import com.isora.ciclo.treatments.TreatmentEntity
 
-/** Version 2 of the stored format (2 adds the follow-up mark). Any schema change needs a migration. */
+/**
+ * Version 3 of the stored format (2 adds the follow-up mark, 3 the patient's identity card).
+ * Any schema change needs a migration, listed in [MIGRATIONS].
+ */
 @Database(
     entities = [ProtocolEntity::class, PatientEntity::class, TreatmentEntity::class, SessionStateEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class CicloDatabase : RoomDatabase() {
@@ -34,12 +37,22 @@ abstract class CicloDatabase : RoomDatabase() {
             }
         }
 
+        /** Adds the nullable, unique identity card; existing patients keep every value and start with none. */
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE patients ADD COLUMN identity_card TEXT")
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_patients_identity_card` ON `patients` (`identity_card`)")
+            }
+        }
+
+        val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
+
         /** Opens the on-disk database encrypted with SQLCipher; [passphrase] comes from the Keystore-wrapped key. */
         fun open(context: Context, passphrase: ByteArray): CicloDatabase {
             System.loadLibrary("sqlcipher")
             return Room.databaseBuilder(context.applicationContext, CicloDatabase::class.java, "ciclo.db")
                 .openHelperFactory(SupportOpenHelperFactory(passphrase))
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(*MIGRATIONS)
                 .build()
         }
     }

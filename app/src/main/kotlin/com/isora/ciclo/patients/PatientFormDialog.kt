@@ -13,25 +13,33 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
 import com.isora.ciclo.R
 
 /**
- * Add or edit a patient: name or initials, clinical record number, optional diagnosis and notes.
- * [onSave] returns false when the clinical record number belongs to another patient.
+ * Add or edit a patient: name or initials, clinical record number, optional diagnosis, notes and identity card.
+ * [onSave] reports null when saved, or which field already belongs to another patient.
+ * [prefill] starts a new patient with text read elsewhere (the daily list photo).
  */
 @Composable
-fun PatientFormDialog(initial: Patient?, onSave: (Patient, (Boolean) -> Unit) -> Unit, onCancel: () -> Unit) {
-    var form by remember { mutableStateOf(initial?.let(PatientForm::from) ?: PatientForm()) }
+fun PatientFormDialog(
+    initial: Patient?,
+    onSave: (Patient, (PatientConflict?) -> Unit) -> Unit,
+    onCancel: () -> Unit,
+    prefill: PatientForm? = null,
+) {
+    var form by remember { mutableStateOf(initial?.let(PatientForm::from) ?: prefill ?: PatientForm()) }
     var errors by remember { mutableStateOf(emptySet<PatientFormError>()) }
-    var duplicate by remember { mutableStateOf(false) }
+    var conflict by remember { mutableStateOf<PatientConflict?>(null) }
 
     fun submit() {
         when (val result = form.validate()) {
             is PatientFormResult.Invalid -> errors = result.errors
-            is PatientFormResult.Valid -> onSave(result.patient) { saved ->
-                if (!saved) {
+            is PatientFormResult.Valid -> onSave(result.patient) { refused ->
+                if (refused != null) {
                     errors = emptySet()
-                    duplicate = true
+                    conflict = refused
                 }
             }
         }
@@ -55,18 +63,36 @@ fun PatientFormDialog(initial: Patient?, onSave: (Patient, (Boolean) -> Unit) ->
                 )
                 CicloTextField(
                     value = form.clinicalRecordNumber,
-                    onValueChange = { form = form.copy(clinicalRecordNumber = it); duplicate = false },
+                    onValueChange = { form = form.copy(clinicalRecordNumber = it); conflict = null },
                     label = { Text(stringResource(R.string.patient_record)) },
-                    isError = PatientFormError.RECORD_REQUIRED in errors || duplicate,
+                    isError = PatientFormError.RECORD_REQUIRED in errors || conflict == PatientConflict.RECORD,
                     supportingText = when {
                         PatientFormError.RECORD_REQUIRED in errors -> {
                             { Text(stringResource(R.string.patient_error_record)) }
                         }
-                        duplicate -> {
+                        conflict == PatientConflict.RECORD -> {
                             { Text(stringResource(R.string.patient_error_duplicate)) }
                         }
                         else -> null
                     },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                CicloTextField(
+                    value = form.identityCard,
+                    onValueChange = { form = form.copy(identityCard = it); conflict = null },
+                    label = { Text(stringResource(R.string.patient_identity_card)) },
+                    isError = PatientFormError.IDENTITY_CARD_INVALID in errors || conflict == PatientConflict.IDENTITY_CARD,
+                    supportingText = when {
+                        PatientFormError.IDENTITY_CARD_INVALID in errors -> {
+                            { Text(stringResource(R.string.patient_error_identity_card)) }
+                        }
+                        conflict == PatientConflict.IDENTITY_CARD -> {
+                            { Text(stringResource(R.string.patient_error_identity_card_duplicate)) }
+                        }
+                        else -> null
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )

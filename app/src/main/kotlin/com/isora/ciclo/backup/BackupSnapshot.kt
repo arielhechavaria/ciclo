@@ -1,6 +1,8 @@
 package com.isora.ciclo.backup
 
 import com.isora.ciclo.patients.PatientEntity
+import com.isora.ciclo.patients.identityCardKey
+import com.isora.ciclo.patients.isIdentityCard
 import com.isora.ciclo.protocols.ProtocolEntity
 import com.isora.ciclo.storage.cycleCountOf
 import com.isora.ciclo.storage.regimenOf
@@ -28,6 +30,9 @@ data class BackupSnapshot(
             require(protocols.map { it.id }.toSet().size == protocols.size) { "Repeated ids" }
             require(treatments.all { it.patientId in patientIds }) { "A treatment has no patient" }
             require(sessionStates.all { it.treatmentId in treatmentIds }) { "A session has no treatment" }
+            val cards = patients.mapNotNull { it.identityCard }
+            require(cards.all { it == identityCardKey(it) && isIdentityCard(it) }) { "Malformed identity card" }
+            require(cards.toSet().size == cards.size) { "Repeated identity cards" }
             treatments.forEach {
                 LocalDate.ofEpochDay(it.startEpochDay)
                 it.finishEpochDay?.let(LocalDate::ofEpochDay)
@@ -62,6 +67,7 @@ object BackupJson {
         .put("patients", JSONArray(snapshot.patients.map {
             JSONObject().put("id", it.id).put("name", it.name).put("clinicalRecordNumber", it.clinicalRecordNumber)
                 .put("diagnosis", it.diagnosis ?: JSONObject.NULL).put("notes", it.notes ?: JSONObject.NULL)
+                .put("identityCard", it.identityCard ?: JSONObject.NULL)
         }))
         .put("treatments", JSONArray(snapshot.treatments.map {
             JSONObject().put("id", it.id).put("patientId", it.patientId).put("protocolName", it.protocolName)
@@ -98,6 +104,8 @@ object BackupJson {
                         id = it.getLong("id"), name = it.getString("name"),
                         clinicalRecordNumber = it.getString("clinicalRecordNumber"),
                         diagnosis = it.text("diagnosis"), notes = it.text("notes"),
+                        // Absent in backups made before the identity card existed.
+                        identityCard = it.text("identityCard"),
                     )
                 },
                 treatments = root.getJSONArray("treatments").objects().map {

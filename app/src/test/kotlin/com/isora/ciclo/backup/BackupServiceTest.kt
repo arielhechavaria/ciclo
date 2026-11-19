@@ -189,4 +189,57 @@ class BackupServiceTest : StorageTestBase() {
 
         assertEquals(null, decoded.treatments.single().followUpDoneEpochDay)
     }
+
+    @Test
+    fun `the identity card survives an export and a restore`() {
+        patients.add(Patient("Ana", "HC1", identityCard = "85010112345"))
+        val file = service.export(password)
+
+        db.clearAllTables()
+        service.restore(file, password)
+
+        assertEquals("85010112345", patients.all().single().patient.identityCard)
+    }
+
+    @Test
+    fun `a backup made before the identity card existed still restores with no card`() {
+        fill()
+        val json = org.json.JSONObject(BackupJson.encode(
+            BackupSnapshot(emptyList(), db.patientDao().all(), emptyList(), emptyList()),
+            day,
+        ))
+        json.getJSONArray("patients").let { array ->
+            for (i in 0 until array.length()) array.getJSONObject(i).remove("identityCard")
+        }
+
+        val decoded = BackupJson.decode(json.toString())
+
+        assertEquals(listOf(null, null), decoded.patients.map { it.identityCard })
+    }
+
+    @Test
+    fun `a backup with a repeated identity card is refused and leaves the data untouched`() {
+        fill()
+        val repeated = BackupSnapshot(
+            protocols = emptyList(),
+            patients = listOf(
+                PatientEntity(1, "X", "HC8", null, null, "85010112345"),
+                PatientEntity(2, "Y", "HC9", null, null, "85010112345"),
+            ),
+            treatments = emptyList(),
+            sessionStates = emptyList(),
+        )
+        val file = BackupCrypto.seal(BackupJson.encode(repeated, day).toByteArray(), password)
+
+        assertThrows(BackupFormatException::class.java) { service.restore(file, password) }
+
+        assertEquals(listOf("Ana", "Beto"), patients.all().map { it.patient.name })
+    }
+
+    @Test
+    fun `a backup with a malformed identity card is refused`() {
+        val bad = BackupSnapshot(emptyList(), listOf(PatientEntity(1, "X", "HC8", null, null, "12A")), emptyList(), emptyList())
+
+        assertThrows(BackupFormatException::class.java) { BackupJson.decode(BackupJson.encode(bad, day)) }
+    }
 }

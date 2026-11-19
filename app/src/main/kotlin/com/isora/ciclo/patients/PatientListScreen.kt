@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.isora.ciclo.R
@@ -45,7 +46,8 @@ fun PatientListScreen(
     today: LocalDate,
     followUpMonths: Int,
     onOpen: (PatientId) -> Unit,
-    onAdd: (Patient, (Boolean) -> Unit) -> Unit,
+    onAdd: (Patient, (PatientConflict?) -> Unit) -> Unit,
+    onPhoto: (() -> Unit)? = null,
 ) {
     var query by remember { mutableStateOf("") }
     var adding by remember { mutableStateOf(false) }
@@ -54,14 +56,20 @@ fun PatientListScreen(
     val matching = snapshot.patients.filter {
         val q = query.trim()
         q.isEmpty() || it.patient.name.contains(q, ignoreCase = true) ||
-            it.patient.clinicalRecordNumber.contains(q, ignoreCase = true)
+            it.patient.clinicalRecordNumber.contains(q, ignoreCase = true) ||
+            it.patient.identityCard?.contains(identityCardKey(q)) == true
     }.sortedBy { it.patient.name.lowercase() }
     val history = matching.filter { snapshot.isHistory(it.id, today) }
     val active = matching - history.toSet()
 
     Scaffold(
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = { adding = true }) { Text(stringResource(R.string.patients_add)) }
+            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(CicloSpacing.xs)) {
+                onPhoto?.let { open ->
+                    ExtendedFloatingActionButton(onClick = open) { Text(stringResource(R.string.list_photo_open)) }
+                }
+                ExtendedFloatingActionButton(onClick = { adding = true }) { Text(stringResource(R.string.patients_add)) }
+            }
         },
     ) { padding ->
         Column(Modifier.padding(padding).padding(horizontal = CicloSpacing.md)) {
@@ -113,7 +121,7 @@ fun PatientListScreen(
     if (adding) {
         PatientFormDialog(
             initial = null,
-            onSave = { patient, done -> onAdd(patient) { saved -> if (saved) adding = false; done(saved) } },
+            onSave = { patient, done -> onAdd(patient) { conflict -> if (conflict == null) adding = false; done(conflict) } },
             onCancel = { adding = false },
         )
     }

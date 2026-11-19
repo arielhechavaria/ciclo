@@ -19,8 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.isora.ciclo.agenda.AgendaScreen
 import com.isora.ciclo.agenda.CareSnapshot
+import com.isora.ciclo.dailylist.DailyListApplier
+import com.isora.ciclo.dailylist.DailyListScreen
 import com.isora.ciclo.mock.MockSeeder
-import com.isora.ciclo.patients.DuplicateClinicalRecordException
+import com.isora.ciclo.patients.PatientConflict
+import com.isora.ciclo.patients.PatientConflictException
 import com.isora.ciclo.patients.Patient
 import com.isora.ciclo.patients.PatientId
 import com.isora.ciclo.patients.PatientListScreen
@@ -49,6 +52,7 @@ fun CicloApp(container: AppContainer, pins: PinStore, onLockNow: () -> Unit) {
     val scope = rememberCoroutineScope()
     var tab by remember { mutableStateOf(Tab.AGENDA) }
     var openPatient by remember { mutableStateOf<PatientId?>(null) }
+    var readingList by remember { mutableStateOf(false) }
     var snapshot by remember { mutableStateOf(CareSnapshot(emptyList(), emptyList())) }
     var protocols by remember { mutableStateOf(emptyList<CatalogProtocol>()) }
     var ready by remember { mutableStateOf(false) }
@@ -65,24 +69,25 @@ fun CicloApp(container: AppContainer, pins: PinStore, onLockNow: () -> Unit) {
         ready = true
     }
 
-    /** Runs a repository write off the main thread and reloads; [then] gets false when the write was refused. */
-    fun write(then: (Boolean) -> Unit = {}, block: () -> Unit) {
+    /** Runs a repository write off the main thread and reloads; [then] gets the conflict when a patient write was refused. */
+    fun write(then: (PatientConflict?) -> Unit = {}, block: () -> Unit) {
         scope.launch {
-            val ok = withContext(Dispatchers.IO) {
+            val conflict = withContext(Dispatchers.IO) {
                 try {
                     block()
-                    true
-                } catch (e: DuplicateClinicalRecordException) {
-                    false
+                    null
+                } catch (e: PatientConflictException) {
+                    e.conflict
                 }
             }
             load()
-            then(ok)
+            then(conflict)
         }
     }
 
     LaunchedEffect(tab, openPatient) { load() }
     BackHandler(openPatient != null) { openPatient = null }
+    BackHandler(openPatient == null && readingList) { readingList = false }
 
     Scaffold(
         bottomBar = {
@@ -93,6 +98,7 @@ fun CicloApp(container: AppContainer, pins: PinStore, onLockNow: () -> Unit) {
                         onClick = {
                             tab = entry
                             openPatient = null
+                            readingList = false
                         },
                         icon = {},
                         label = { Text(stringResource(entry.label)) },
@@ -112,13 +118,45 @@ fun CicloApp(container: AppContainer, pins: PinStore, onLockNow: () -> Unit) {
                     today = today,
                     followUpMonths = container.settings.followUpMonths,
                     onBack = { openPatient = null },
-                    onEditPatient = { updated: Patient, done: (Boolean) -> Unit ->
+                    onEditPatient = { updated: Patient, done: (PatientConflict?) -> Unit ->
                         write(then = done) { container.patients.update(patient.id, updated) }
                     },
                     onAssign = { name: String, treatment: Treatment ->
                         write { container.treatments.assign(patient.id, name, treatment) }
                     },
                     onChange = { stored: StoredTreatment -> write { container.treatments.save(stored) } },
+                )
+            } else if (readingList) {
+                DailyListScreen(
+                    snapshot = snapshot,
+                    protocols = protocols,
+                    today = today,
+                    lockGuard = container.lockGuard,
+                    showSample = BuildConfig.MOCK_DATA,
+                    onBack = { readingList = false },
+                    onUpdateExisting = { actions, done ->
+                        scope.launch {
+                            val refused = withContext(Dispatchers.IO) {
+                                DailyListApplier(container.patients, container.treatments).apply(actions, today)
+                            }
+                            load()
+                            done(refused)
+                        }
+                    },
+                    onAddPatient = { newPatient, done ->
+                        scope.launch {
+                            val (stored, conflict) = withContext(Dispatchers.IO) {
+                                try {
+                                    container.patients.add(newPatient) to null
+                                } catch (e: PatientConflictException) {
+                                    null to e.conflict
+                                }
+                            }
+                            load()
+                            done(stored, conflict)
+                        }
+                    },
+                    onAssign = { id, name, treatment -> write { container.treatments.assign(id, name, treatment) } },
                 )
             } else {
                 when (tab) {
@@ -128,9 +166,10 @@ fun CicloApp(container: AppContainer, pins: PinStore, onLockNow: () -> Unit) {
                         today = today,
                         followUpMonths = container.settings.followUpMonths,
                         onOpen = { openPatient = it },
-                        onAdd = { newPatient: Patient, done: (Boolean) -> Unit ->
+                        onAdd = { newPatient: Patient, done: (PatientConflict?) -> Unit ->
                             write(then = done) { container.patients.add(newPatient) }
                         },
+                        onPhoto = { readingList = true },
                     )
                     Tab.PROTOCOLS -> ProtocolCatalogScreen(container.catalog)
                     Tab.SETTINGS -> SettingsScreen(

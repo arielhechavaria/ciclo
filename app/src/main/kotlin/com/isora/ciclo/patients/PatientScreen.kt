@@ -49,7 +49,7 @@ fun PatientScreen(
     today: LocalDate,
     followUpMonths: Int,
     onBack: () -> Unit,
-    onEditPatient: (Patient, (Boolean) -> Unit) -> Unit,
+    onEditPatient: (Patient, (PatientConflict?) -> Unit) -> Unit,
     onAssign: (protocolName: String, Treatment) -> Unit,
     onChange: (StoredTreatment) -> Unit,
 ) {
@@ -60,6 +60,7 @@ fun PatientScreen(
         TextButton(onClick = onBack) { Text(stringResource(R.string.back)) }
         Text(patient.patient.name, style = MaterialTheme.typography.headlineMedium)
         Text(stringResource(R.string.patient_record_line, patient.patient.clinicalRecordNumber))
+        patient.patient.identityCard?.let { Text(stringResource(R.string.patient_identity_card_line, it)) }
         patient.patient.diagnosis?.let { Text(it) }
         patient.patient.notes?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
         Row(Modifier.padding(vertical = CicloSpacing.xs), horizontalArrangement = Arrangement.spacedBy(CicloSpacing.xs)) {
@@ -73,7 +74,7 @@ fun PatientScreen(
     if (editing) {
         PatientFormDialog(
             initial = patient.patient,
-            onSave = { updated, done -> onEditPatient(updated) { saved -> if (saved) editing = false; done(saved) } },
+            onSave = { updated, done -> onEditPatient(updated) { conflict -> if (conflict == null) editing = false; done(conflict) } },
             onCancel = { editing = false },
         )
     }
@@ -100,22 +101,10 @@ private fun TreatmentCard(stored: StoredTreatment, today: LocalDate, followUpMon
     val cycles = treatment.cycles().take(shownCycles + 1).toList()
     val visible = cycles.take(shownCycles)
     val hasMore = cycles.size > shownCycles
-    val next = treatment.sessions().firstOrNull { !it.given }
-    val total = treatment.totalCycles
-
     CicloCard(Modifier.fillMaxWidth().padding(vertical = CicloSpacing.xs)) {
         Column(Modifier.padding(CicloSpacing.lg)) {
             Text(stored.protocolName, style = MaterialTheme.typography.titleLarge)
-            if (next != null) {
-                val progress = if (total != null) {
-                    stringResource(R.string.progress_of, next.ref.cycle, total, next.ref.session, treatment.regimen.sessionsPerCycle)
-                } else {
-                    stringResource(R.string.progress_open, next.ref.cycle, next.ref.session, treatment.regimen.sessionsPerCycle)
-                }
-                Text(progress)
-            } else {
-                Text(stringResource(R.string.progress_done))
-            }
+            Text(treatmentProgress(treatment))
             val end = treatment.endDate
             when {
                 treatment.earlyFinish != null -> Text(
@@ -254,4 +243,16 @@ private fun FinishEarlyDialog(today: LocalDate, onConfirm: (String) -> Unit, onC
         },
         dismissButton = { TextButton(onClick = onCancel) { Text(stringResource(R.string.protocol_form_cancel)) } },
     )
+}
+
+/** "Ciclo X de N, sesión Y de M" for the next session not given yet, or that every session was given. */
+@Composable
+fun treatmentProgress(treatment: Treatment): String {
+    val next = treatment.sessions().firstOrNull { !it.given } ?: return stringResource(R.string.progress_done)
+    val total = treatment.totalCycles
+    return if (total != null) {
+        stringResource(R.string.progress_of, next.ref.cycle, total, next.ref.session, treatment.regimen.sessionsPerCycle)
+    } else {
+        stringResource(R.string.progress_open, next.ref.cycle, next.ref.session, treatment.regimen.sessionsPerCycle)
+    }
 }

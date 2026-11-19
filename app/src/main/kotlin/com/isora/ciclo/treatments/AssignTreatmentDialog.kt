@@ -29,16 +29,22 @@ import com.isora.ciclo.protocols.CatalogProtocol
 import com.isora.ciclo.protocols.CycleCount
 import com.isora.ciclo.ui.DatePickerModal
 import com.isora.ciclo.ui.formatLong
+import java.time.LocalDate
 
-/** Choose a protocol from the catalog, set the number of cycles and the start date. */
+/**
+ * Choose a protocol from the catalog, set the number of cycles and the start date.
+ * [preselected] (a protocol name) and [startDate] fill the form in advance, as the daily list photo does.
+ */
 @Composable
 fun AssignTreatmentDialog(
     protocols: List<CatalogProtocol>,
     onAssign: (protocolName: String, Treatment) -> Unit,
     onCancel: () -> Unit,
+    preselected: String? = null,
+    startDate: LocalDate? = null,
 ) {
-    var selected by remember { mutableStateOf(protocols.firstOrNull()) }
-    var form by remember { mutableStateOf(selected?.let { AssignForm(it.protocol) }) }
+    var selected by remember { mutableStateOf(protocols.firstOrNull { it.protocol.name == preselected } ?: protocols.firstOrNull()) }
+    var form by remember { mutableStateOf(selected?.let { AssignForm(it.protocol, startDate = startDate) }) }
     var errors by remember { mutableStateOf(emptySet<AssignFormError>()) }
     var picking by remember { mutableStateOf(false) }
 

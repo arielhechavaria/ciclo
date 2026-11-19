@@ -15,4 +15,22 @@ class PatientFormTest {
         val result = PatientForm(name = " A.B. ", clinicalRecordNumber = "HC-1").validate() as PatientFormResult.Valid
         assertEquals(Patient("A.B.", "HC-1"), result.patient)
     }
+
+    @Test
+    fun anIdentityCardThatIsNot11DigitsIsAnError() {
+        val result = PatientForm(name = "A.B.", clinicalRecordNumber = "HC-1", identityCard = "1234").validate()
+        assertEquals(PatientFormResult.Invalid(setOf(PatientFormError.IDENTITY_CARD_INVALID)), result)
+    }
+
+    @Test
+    fun theIdentityCardIsSavedWithoutSpaces() {
+        val result = PatientForm(name = "A.B.", clinicalRecordNumber = "HC-1", identityCard = "850101 12345")
+            .validate() as PatientFormResult.Valid
+        assertEquals("85010112345", result.patient.identityCard)
+    }
+
+    @Test
+    fun editingAPatientStartsWithItsIdentityCard() {
+        assertEquals("85010112345", PatientForm.from(Patient("A.B.", "HC-1", identityCard = "85010112345")).identityCard)
+    }
 }

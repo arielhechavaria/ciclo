@@ -64,7 +64,7 @@
 
     <string name="patients_title">Pacientes</string>
     <string name="patients_add">Añadir paciente</string>
-    <string name="patients_search">Buscar por nombre o nº de historia</string>
+    <string name="patients_search">Buscar por nombre, nº de historia o carnet</string>
     <string name="patients_empty">No hay pacientes.</string>
     <string name="patients_filter_all">Todos</string>
     <string name="patients_filter_protocol">Por protocolo</string>
@@ -88,6 +88,10 @@
     <string name="patient_notes">Notas (opcional)</string>
     <string name="patient_error_record">Escribe el nº de historia clínica</string>
     <string name="patient_error_duplicate">Ese nº de historia ya pertenece a otro paciente</string>
+    <string name="patient_identity_card">Carnet de identidad (opcional)</string>
+    <string name="patient_error_identity_card">El carnet tiene 11 dígitos</string>
+    <string name="patient_error_identity_card_duplicate">Ese carnet ya pertenece a otro paciente</string>
+    <string name="patient_identity_card_line">Carnet de identidad: %1$s</string>
 
     <string name="assign_title">Asignar tratamiento</string>
     <string name="assign_start_date">Fecha de inicio</string>
@@ -174,4 +178,31 @@
     <string name="notification_postponed">Pospuestas: %1$s</string>
     <string name="notification_finishing">Terminan: %1$s</string>
     <string name="notification_reevaluate">Reevaluar: %1$s</string>
+
+    <string name="list_photo_open">Foto de la lista</string>
+    <string name="list_photo_title">Foto de la lista del día</string>
+    <string name="list_photo_intro">Haz la foto de la lista de pacientes del día. La app la lee en el propio móvil: la foto no sale del teléfono y se borra al terminar. Después revisas lo que leyó y lo confirmas.</string>
+    <string name="list_photo_hint">Se leen el nombre y apellidos, el carnet de identidad y el tratamiento de cada fila. Funciona bien con listas impresas y peor con letra a mano.</string>
+    <string name="list_photo_take">Hacer foto</string>
+    <string name="list_photo_sample">Probar con la lista de ejemplo</string>
+    <string name="list_photo_reading">Leyendo la lista…</string>
+    <string name="list_photo_no_camera">No se encontró una app de cámara en el teléfono.</string>
+    <string name="list_photo_failed">No se pudo leer la foto. Prueba de nuevo con más luz y la hoja recta.</string>
+    <string name="list_photo_empty">No se encontró ningún paciente en la foto. Prueba de nuevo con más luz y la hoja recta.</string>
+    <string name="list_photo_review">Revisa lo que se leyó</string>
+    <string name="list_photo_card">Carnet %1$s</string>
+    <string name="list_photo_no_treatment">sin tratamiento</string>
+    <string name="list_photo_registered">Ya registrada · %1$s</string>
+    <string name="list_photo_registered_idle">Ya registrada · sin tratamiento en curso</string>
+    <string name="list_photo_probable">¿Es %1$s (%2$s)?</string>
+    <string name="list_photo_same_person">Es la misma persona</string>
+    <string name="list_photo_new">Nueva · completar datos</string>
+    <string name="list_photo_unknown_treatment">«%1$s» no está en el catálogo: elige el protocolo al registrarla</string>
+    <string name="list_photo_include">Incluir</string>
+    <string name="list_photo_today">Sesión de hoy dada</string>
+    <string name="list_photo_unread">No se leyeron</string>
+    <string name="list_photo_confirm">Confirmar</string>
+    <string name="list_photo_card_taken">El carnet de %1$s ya pertenece a otro paciente y no se guardó.</string>
+    <string name="list_photo_registering">Registrar %1$d de %2$d</string>
+    <string name="list_photo_done">Lista aplicada.</string>
 </resources>

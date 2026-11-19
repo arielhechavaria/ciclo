@@ -1,6 +1,10 @@
 package com.isora.ciclo.mock
 
 import com.isora.ciclo.agenda.CareSnapshot
+import com.isora.ciclo.dailylist.DailyListMatcher
+import com.isora.ciclo.dailylist.DailyListReader
+import com.isora.ciclo.dailylist.MatchKind
+import com.isora.ciclo.protocols.ProtocolSeed
 import com.isora.ciclo.patients.PatientId
 import com.isora.ciclo.patients.StoredPatient
 import com.isora.ciclo.treatments.StoredTreatment
@@ -59,5 +63,22 @@ class MockDataTest {
         cases.mapNotNull { it.treatment }.forEach { t ->
             t.sessions().takeWhile { it.date < today.plusDays(30) }.forEach { assertEquals(it.date < today, it.given) }
         }
+    }
+
+    @Test
+    fun `identity cards are unique`() {
+        val cards = cases.mapNotNull { it.patient.identityCard }
+        assertEquals(cards.size, cards.toSet().size)
+    }
+
+    @Test
+    fun `the sample daily list exercises a card match, a name match, a new patient and an unknown treatment`() {
+        val reading = DailyListReader.read(MockData.sampleList())
+        val rows = DailyListMatcher.match(reading.entries, snapshot().patients, ProtocolSeed.protocols.map { it.name })
+
+        assertEquals(listOf(MatchKind.CARD, MatchKind.NAME, MatchKind.NEW, MatchKind.NEW), rows.map { it.kind })
+        assertEquals(listOf("M.R.G.", "S.E.L.", null, null), rows.map { it.patient?.patient?.name })
+        assertEquals(listOf("AC", "Gemcitabina + cisplatino", "FOLFOX", null), rows.map { it.protocolName })
+        assertEquals(listOf("Consulta de oncología", "Nombre y apellidos Carnet Tratamiento"), reading.unread)
     }
 }

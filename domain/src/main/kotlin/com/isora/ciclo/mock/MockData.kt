@@ -1,5 +1,6 @@
 package com.isora.ciclo.mock
 
+import com.isora.ciclo.dailylist.TextLine
 import com.isora.ciclo.patients.Patient
 import com.isora.ciclo.protocols.CycleCount
 import com.isora.ciclo.protocols.ProtocolSeed
@@ -24,10 +25,14 @@ object MockData {
     fun build(today: LocalDate): List<MockCase> {
         val nextTuesday = today.with(TemporalAdjusters.next(DayOfWeek.TUESDAY))
         return listOf(
-            // Session today, second cycle of four.
-            case("M.R.G.", "HC-1001", "Ca de mama HER2 negativo", "AC", "Alérgica al látex.") { protocol("AC", today.minusDays(21)) },
+            // Session today, second cycle of four. Its identity card appears on the sample daily list.
+            case("M.R.G.", "HC-1001", "Ca de mama HER2 negativo", "AC", "Alérgica al látex.", card = SAMPLE_CARD) {
+                protocol("AC", today.minusDays(21))
+            },
             // Last session of the treatment is today.
-            case("L.P.S.", "HC-1002", "Ca de mama triple negativo", "AC dosis densa") { protocol("AC dosis densa", today.minusDays(42)) },
+            case("L.P.S.", "HC-1002", "Ca de mama triple negativo", "AC dosis densa", card = "90020254321") {
+                protocol("AC dosis densa", today.minusDays(42))
+            },
             // Weekly protocol, many sessions.
             case("A.C.D.", "HC-1003", "Ca de mama luminal", "Paclitaxel semanal") { protocol("Paclitaxel semanal", today.minusDays(35)) },
             // Second session postponed three days.
@@ -73,8 +78,31 @@ object MockData {
         diagnosis: String,
         protocolName: String,
         notes: String? = null,
+        card: String? = null,
         treatment: () -> Treatment,
-    ) = MockCase(Patient(name, record, diagnosis, notes), protocolName, treatment())
+    ) = MockCase(Patient(name, record, diagnosis, notes, card), protocolName, treatment())
+
+    private const val SAMPLE_CARD = "75031512345"
+
+    /**
+     * A fictional daily list as OCR would return it: a title, a header and four rows, column by column.
+     * Rows: M.R.G. by identity card; S.E.L. by name only (no card on file); a new patient on FOLFOX;
+     * a new patient on a treatment that is not in the catalog.
+     */
+    fun sampleList(): List<TextLine> {
+        val rows = listOf(
+            Triple("M.R.G.", "750315 12345", "AC"),
+            Triple("S.E.L.", "68042298765", "Gemcitabina + cisplatino"),
+            Triple("Luis Fernández Rey", "70010111111", "FOLFOX"),
+            Triple("Rosa Díaz Martín", "66050544332", "XELOX"),
+        )
+        fun line(text: String, left: Int, top: Int) = TextLine(text, left, top, left + 250, top + 30)
+        val top = 200
+        return listOf(line("Consulta de oncología", 40, 40), line("Nombre y apellidos", 40, 140), line("Carnet", 400, 141), line("Tratamiento", 700, 139)) +
+            rows.mapIndexed { i, r -> line(r.first, 40, top + i * 60) } +
+            rows.mapIndexed { i, r -> line(r.second, 400, top + i * 60 + 2) } +
+            rows.mapIndexed { i, r -> line(r.third, 700, top + i * 60 - 1) }
+    }
 
     private fun protocol(name: String, start: LocalDate): Treatment =
         Treatment.assign(ProtocolSeed.protocols.first { it.name == name }, start)
