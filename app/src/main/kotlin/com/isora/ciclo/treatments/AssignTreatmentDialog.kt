@@ -1,5 +1,7 @@
 package com.isora.ciclo.treatments
 
+import com.isora.ciclo.ui.CicloSpacing
+import com.isora.ciclo.ui.CicloTextField
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -9,7 +11,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -23,7 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.isora.ciclo.R
 import com.isora.ciclo.protocols.CatalogProtocol
 import com.isora.ciclo.protocols.CycleCount
@@ -58,12 +58,12 @@ fun AssignTreatmentDialog(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         RadioButton(selected = entry == selected, onClick = null)
-                        Text(entry.protocol.name, Modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp))
+                        Text(entry.protocol.name, Modifier.padding(start = CicloSpacing.xs, top = CicloSpacing.xs, bottom = CicloSpacing.xs))
                     }
                 }
                 form?.let { current ->
                     val untilProgression = current.protocol.defaultCycles is CycleCount.UntilProgression
-                    OutlinedTextField(
+                    CicloTextField(
                         value = current.cycles,
                         onValueChange = { form = current.copy(cycles = it) },
                         label = {
@@ -74,9 +74,9 @@ fun AssignTreatmentDialog(
                             { Text(stringResource(R.string.protocol_error_cycles)) }
                         } else null,
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        modifier = Modifier.fillMaxWidth().padding(top = CicloSpacing.xs),
                     )
-                    OutlinedButton(onClick = { picking = true }, Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                    OutlinedButton(onClick = { picking = true }, Modifier.fillMaxWidth().padding(top = CicloSpacing.xs)) {
                         Text(current.startDate?.formatLong() ?: stringResource(R.string.assign_start_date))
                     }
                     if (AssignFormError.START_DATE_REQUIRED in errors) {

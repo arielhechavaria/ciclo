@@ -1,5 +1,7 @@
 package com.isora.ciclo.patients
 
+import com.isora.ciclo.ui.CicloSpacing
+import com.isora.ciclo.ui.CicloTextField
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.isora.ciclo.R
 import com.isora.ciclo.agenda.CareSnapshot
 import com.isora.ciclo.ui.formatLong
@@ -48,20 +48,20 @@ fun PatientListScreen(
             ExtendedFloatingActionButton(onClick = { adding = true }) { Text(stringResource(R.string.patients_add)) }
         },
     ) { padding ->
-        Column(Modifier.padding(padding).padding(horizontal = 16.dp)) {
+        Column(Modifier.padding(padding).padding(horizontal = CicloSpacing.md)) {
             Text(
                 stringResource(R.string.patients_title),
                 style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(vertical = 16.dp),
+                modifier = Modifier.padding(vertical = CicloSpacing.md),
             )
-            OutlinedTextField(
+            CicloTextField(
                 value = query,
                 onValueChange = { query = it },
                 label = { Text(stringResource(R.string.patients_search)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
-            LazyColumn(Modifier.padding(top = 8.dp)) {
+            LazyColumn(Modifier.padding(top = CicloSpacing.xs)) {
                 if (matching.isEmpty()) item { Text(stringResource(R.string.patients_empty)) }
                 items(active, key = { "a${it.id.value}" }) { stored -> PatientRow(stored, snapshot, today, onOpen) }
                 if (history.isNotEmpty()) {
@@ -69,7 +69,7 @@ fun PatientListScreen(
                         Text(
                             stringResource(R.string.patients_history),
                             style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
+                            modifier = Modifier.padding(top = CicloSpacing.md, bottom = CicloSpacing.xxs),
                         )
                     }
                     items(history, key = { "h${it.id.value}" }) { stored -> PatientRow(stored, snapshot, today, onOpen) }
@@ -97,7 +97,7 @@ private fun PatientRow(stored: StoredPatient, snapshot: CareSnapshot, today: Loc
             stringResource(R.string.patient_finished_on, treatments.mapNotNull { it.treatment.endDate }.max().formatLong())
         else -> stringResource(R.string.patient_no_treatment)
     }
-    Column(Modifier.fillMaxWidth().clickable { onOpen(stored.id) }.padding(vertical = 8.dp)) {
+    Column(Modifier.fillMaxWidth().clickable { onOpen(stored.id) }.padding(vertical = CicloSpacing.xs)) {
         Text(stored.patient.name, style = MaterialTheme.typography.titleMedium)
         Text("${stored.patient.clinicalRecordNumber} · $status", style = MaterialTheme.typography.bodyMedium)
     }

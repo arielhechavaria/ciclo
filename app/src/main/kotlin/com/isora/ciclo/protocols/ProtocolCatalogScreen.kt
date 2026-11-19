@@ -1,5 +1,7 @@
 package com.isora.ciclo.protocols
 
+import com.isora.ciclo.ui.CicloSpacing
+import com.isora.ciclo.ui.CicloTextField
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Column
@@ -11,7 +13,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -29,7 +30,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.isora.ciclo.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -102,11 +102,11 @@ fun ProtocolCatalogScreen(catalog: ProtocolCatalog, io: CoroutineContext = Dispa
             }
         },
     ) { padding ->
-        Column(Modifier.padding(padding).padding(horizontal = 16.dp)) {
+        Column(Modifier.padding(padding).padding(horizontal = CicloSpacing.md)) {
             Text(
                 stringResource(R.string.protocols_title),
                 style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(vertical = 16.dp),
+                modifier = Modifier.padding(vertical = CicloSpacing.md),
             )
             LabeledSwitch(
                 label = stringResource(R.string.protocols_show_archived),
@@ -114,7 +114,7 @@ fun ProtocolCatalogScreen(catalog: ProtocolCatalog, io: CoroutineContext = Dispa
                 onChange = { showArchived = it },
             )
             if (items.isEmpty()) Text(stringResource(R.string.protocols_empty))
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(CicloSpacing.xs)) {
                 items(items, key = { it.id.value }) { entry ->
                     ProtocolRow(
                         entry = entry,
@@ -146,7 +146,7 @@ private fun ProtocolRow(entry: CatalogProtocol, onEdit: () -> Unit, onToggleArch
         Text(entry.protocol.name, style = MaterialTheme.typography.titleMedium)
         Text(protocolSummary(entry.protocol), style = MaterialTheme.typography.bodyMedium)
         Row {
-            if (entry.archived) Text(stringResource(R.string.protocol_archived_badge), Modifier.padding(end = 8.dp))
+            if (entry.archived) Text(stringResource(R.string.protocol_archived_badge), Modifier.padding(end = CicloSpacing.xs))
             TextButton(onClick = onEdit) { Text(stringResource(R.string.protocol_edit)) }
             TextButton(onClick = onToggleArchived) {
                 Text(stringResource(if (entry.archived) R.string.protocol_restore else R.string.protocol_archive))
@@ -178,7 +178,7 @@ private fun ProtocolFormDialog(
     val form = state.form
 
     @Composable
-    fun field(label: Int, value: String, error: Int?, onValue: (String) -> Unit) = OutlinedTextField(
+    fun field(label: Int, value: String, error: Int?, onValue: (String) -> Unit) = CicloTextField(
         value = value,
         onValueChange = onValue,
         label = { Text(stringResource(label)) },
@@ -239,10 +239,10 @@ private fun ProtocolFormDialog(
 @Composable
 private fun LabeledSwitch(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
     Row(
-        Modifier.toggleable(value = checked, role = Role.Switch, onValueChange = onChange).padding(vertical = 8.dp),
+        Modifier.toggleable(value = checked, role = Role.Switch, onValueChange = onChange).padding(vertical = CicloSpacing.xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Switch(checked = checked, onCheckedChange = null)
-        Text(label, Modifier.padding(start = 8.dp))
+        Text(label, Modifier.padding(start = CicloSpacing.xs))
     }
 }

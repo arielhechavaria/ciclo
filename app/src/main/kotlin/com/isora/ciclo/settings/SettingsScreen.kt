@@ -1,5 +1,7 @@
 package com.isora.ciclo.settings
 
+import com.isora.ciclo.ui.CicloSpacing
+import com.isora.ciclo.ui.CicloTextField
 import android.Manifest
 import android.app.AlarmManager
 import android.content.Context
@@ -20,7 +22,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.dp
 import com.isora.ciclo.R
 import com.isora.ciclo.notifications.FridayNotifier
 import com.isora.ciclo.security.PinStore
@@ -59,23 +59,23 @@ fun SettingsScreen(settings: AppSettings, pins: PinStore, onLockNow: () -> Unit)
     val fingerprintAvailable = BiometricManager.from(context)
         .canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS
 
-    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp)) {
+    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(CicloSpacing.md)) {
         Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.headlineMedium)
 
-        Text(stringResource(R.string.settings_friday), Modifier.padding(top = 16.dp), style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.settings_friday), Modifier.padding(top = CicloSpacing.md), style = MaterialTheme.typography.titleMedium)
         Text(stringResource(R.string.settings_friday_hint), style = MaterialTheme.typography.bodySmall)
         Row(
             Modifier.toggleable(value = enabled, role = Role.Switch, onValueChange = {
                 enabled = it
                 settings.fridayEnabled = it
                 FridayNotifier.schedule(context)
-            }).padding(vertical = 8.dp),
+            }).padding(vertical = CicloSpacing.xs),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Switch(checked = enabled, onCheckedChange = null)
-            Text(stringResource(R.string.settings_friday_switch), Modifier.padding(start = 8.dp))
+            Text(stringResource(R.string.settings_friday_switch), Modifier.padding(start = CicloSpacing.xs))
         }
-        OutlinedTextField(
+        CicloTextField(
             value = timeText,
             onValueChange = {
                 timeText = it
@@ -104,15 +104,15 @@ fun SettingsScreen(settings: AppSettings, pins: PinStore, onLockNow: () -> Unit)
                     FridayNotifier.schedule(context)
                 }
             },
-            modifier = Modifier.padding(top = 4.dp),
+            modifier = Modifier.padding(top = CicloSpacing.xxs),
         ) { Text(stringResource(R.string.protocol_form_save)) }
 
-        Text(stringResource(R.string.settings_reliability), Modifier.padding(top = 24.dp), style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.settings_reliability), Modifier.padding(top = CicloSpacing.xl), style = MaterialTheme.typography.titleMedium)
         Text(stringResource(R.string.settings_reliability_hint), style = MaterialTheme.typography.bodySmall)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             OutlinedButton(
                 onClick = { notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS) },
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = CicloSpacing.xs),
             ) { Text(stringResource(R.string.settings_allow_notifications)) }
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -125,28 +125,28 @@ fun SettingsScreen(settings: AppSettings, pins: PinStore, onLockNow: () -> Unit)
                         )
                     }
                 },
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = CicloSpacing.xs),
             ) { Text(stringResource(R.string.settings_exact_alarm)) }
         }
         OutlinedButton(
             onClick = { context.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)) },
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = CicloSpacing.xs),
         ) { Text(stringResource(R.string.settings_battery)) }
 
-        Text(stringResource(R.string.settings_lock), Modifier.padding(top = 24.dp), style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.settings_lock), Modifier.padding(top = CicloSpacing.xl), style = MaterialTheme.typography.titleMedium)
         if (fingerprintAvailable) {
             Row(
                 Modifier.toggleable(value = fingerprint, role = Role.Switch, onValueChange = {
                     fingerprint = it
                     pins.fingerprintEnabled = it
-                }).padding(vertical = 8.dp),
+                }).padding(vertical = CicloSpacing.xs),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Switch(checked = fingerprint, onCheckedChange = null)
-                Text(stringResource(R.string.settings_fingerprint), Modifier.padding(start = 8.dp))
+                Text(stringResource(R.string.settings_fingerprint), Modifier.padding(start = CicloSpacing.xs))
             }
         }
-        OutlinedTextField(
+        CicloTextField(
             value = newPin,
             onValueChange = {
                 if (it.length <= PinStore.MAX_LENGTH && it.all(Char::isDigit)) newPin = it
@@ -167,9 +167,9 @@ fun SettingsScreen(settings: AppSettings, pins: PinStore, onLockNow: () -> Unit)
                     pinMessage = R.string.lock_error_format
                 }
             },
-            modifier = Modifier.padding(top = 4.dp),
+            modifier = Modifier.padding(top = CicloSpacing.xxs),
         ) { Text(stringResource(R.string.settings_change_pin)) }
-        Button(onClick = onLockNow, Modifier.fillMaxWidth().padding(top = 16.dp)) {
+        Button(onClick = onLockNow, Modifier.fillMaxWidth().padding(top = CicloSpacing.md)) {
             Text(stringResource(R.string.settings_lock_now))
         }
     }

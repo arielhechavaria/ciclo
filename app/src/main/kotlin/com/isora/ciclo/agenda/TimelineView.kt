@@ -1,5 +1,6 @@
 package com.isora.ciclo.agenda
 
+import com.isora.ciclo.ui.CicloColors
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -97,7 +98,7 @@ fun TimelineView(snapshot: CareSnapshot, today: LocalDate, onOpenPatient: (Patie
                             fun x(date: LocalDate) = ChronoUnit.DAYS.between(rangeStart, date) * dayPx
                             for (week in 0 until weeks) {
                                 drawLine(
-                                    Color(0x14000000),
+                                    CicloColors.hairlineSoft,
                                     Offset(week * 7 * dayPx, 0f),
                                     Offset(week * 7 * dayPx, size.height),
                                 )

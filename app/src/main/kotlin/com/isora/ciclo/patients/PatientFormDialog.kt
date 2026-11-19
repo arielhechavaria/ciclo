@@ -1,9 +1,9 @@
 package com.isora.ciclo.patients
 
+import com.isora.ciclo.ui.CicloTextField
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -42,7 +42,7 @@ fun PatientFormDialog(initial: Patient?, onSave: (Patient, (Boolean) -> Unit) ->
         title = { Text(stringResource(if (initial == null) R.string.patient_form_new else R.string.patient_form_edit)) },
         text = {
             Column {
-                OutlinedTextField(
+                CicloTextField(
                     value = form.name,
                     onValueChange = { form = form.copy(name = it) },
                     label = { Text(stringResource(R.string.patient_name)) },
@@ -53,7 +53,7 @@ fun PatientFormDialog(initial: Patient?, onSave: (Patient, (Boolean) -> Unit) ->
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                OutlinedTextField(
+                CicloTextField(
                     value = form.clinicalRecordNumber,
                     onValueChange = { form = form.copy(clinicalRecordNumber = it); duplicate = false },
                     label = { Text(stringResource(R.string.patient_record)) },
@@ -70,14 +70,14 @@ fun PatientFormDialog(initial: Patient?, onSave: (Patient, (Boolean) -> Unit) ->
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                OutlinedTextField(
+                CicloTextField(
                     value = form.diagnosis,
                     onValueChange = { form = form.copy(diagnosis = it) },
                     label = { Text(stringResource(R.string.patient_diagnosis)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                OutlinedTextField(
+                CicloTextField(
                     value = form.notes,
                     onValueChange = { form = form.copy(notes = it) },
                     label = { Text(stringResource(R.string.patient_notes)) },
