@@ -42,7 +42,13 @@ jobs:
           CICLO_VERSION_CODE: ${{ github.run_number }}
         run: |
           export CICLO_VERSION_NAME="${GITHUB_REF_NAME#v}"
-          gradle :domain:test :app:testDebugUnitTest :app:assembleRelease --no-daemon
+          gradle :domain:test :app:testDebugUnitTest :app:assembleRelease :app:assembleDebug --no-daemon
+
+      - name: Verify APK signature and manifest
+        run: |
+          bt=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          "$bt/apksigner" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
+          "$bt/aapt2" dump badging app/build/outputs/apk/release/app-release.apk | head -5
 
       - name: Publish release
         env:
@@ -50,5 +56,6 @@ jobs:
         run: |
           apk="ciclo-${GITHUB_REF_NAME}.apk"
           cp app/build/outputs/apk/release/app-release.apk "$apk"
-          gh release create "$GITHUB_REF_NAME" "$apk" \
+          cp app/build/outputs/apk/debug/app-debug.apk "ciclo-${GITHUB_REF_NAME}-debug.apk"
+          gh release create "$GITHUB_REF_NAME" "$apk" "ciclo-${GITHUB_REF_NAME}-debug.apk" \
             --title "Ciclo $GITHUB_REF_NAME" --generate-notes --prerelease
