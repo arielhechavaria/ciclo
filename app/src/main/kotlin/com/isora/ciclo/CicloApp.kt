@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.isora.ciclo.agenda.AgendaScreen
 import com.isora.ciclo.agenda.CareSnapshot
+import com.isora.ciclo.mock.MockSeeder
 import com.isora.ciclo.patients.DuplicateClinicalRecordException
 import com.isora.ciclo.patients.Patient
 import com.isora.ciclo.patients.PatientId
@@ -56,6 +57,7 @@ fun CicloApp(container: AppContainer, pins: PinStore, onLockNow: () -> Unit) {
     suspend fun load() {
         val loaded = withContext(Dispatchers.IO) {
             container.catalog.seedIfEmpty()
+            if (BuildConfig.MOCK_DATA && container.patients.all().isEmpty()) MockSeeder.seed(container, today)
             CareSnapshot(container.patients.all(), container.treatments.all()) to container.catalog.all()
         }
         snapshot = loaded.first
@@ -129,7 +131,14 @@ fun CicloApp(container: AppContainer, pins: PinStore, onLockNow: () -> Unit) {
                         },
                     )
                     Tab.PROTOCOLS -> ProtocolCatalogScreen(container.catalog)
-                    Tab.SETTINGS -> SettingsScreen(container.settings, pins, onLockNow)
+                    Tab.SETTINGS -> SettingsScreen(
+                        settings = container.settings,
+                        pins = pins,
+                        onLockNow = onLockNow,
+                        onLoadMock = if (BuildConfig.MOCK_DATA) {
+                            { write { MockSeeder.seed(container, today) } }
+                        } else null,
+                    )
                 }
             }
         }
