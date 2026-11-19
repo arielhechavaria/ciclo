@@ -1,6 +1,7 @@
 package com.isora.ciclo.storage
 
 import com.isora.ciclo.patients.Patient
+import android.database.sqlite.SQLiteConstraintException
 import com.isora.ciclo.patients.RoomPatientRepository
 import com.isora.ciclo.protocols.CycleCount
 import com.isora.ciclo.protocols.Protocol
@@ -8,9 +9,13 @@ import com.isora.ciclo.protocols.Regimen
 import com.isora.ciclo.protocols.RoomProtocolCatalog
 import com.isora.ciclo.treatments.RoomTreatmentRepository
 import com.isora.ciclo.treatments.SessionRef
+import com.isora.ciclo.treatments.SessionStateEntity
+import com.isora.ciclo.treatments.StoredTreatment
+import com.isora.ciclo.treatments.TreatmentId
 import com.isora.ciclo.treatments.Treatment
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import java.time.LocalDate
 
@@ -100,5 +105,44 @@ class RoomTreatmentRepositoryTest : StorageTestBase() {
         treatments.assign(maria.id, ac.name, Treatment.assign(ac, start.plusDays(7)))
         assertEquals(1, treatments.forPatient(alberto.id).size)
         assertEquals(2, treatments.all().size)
+    }
+
+    @Test
+    fun savingAMissingTreatmentFailsAndWritesNothing() {
+        val patient = patients.add(Patient("Alberto R.", "10234"))
+        val ghost = StoredTreatment(TreatmentId(999), patient.id, ac.name, Treatment.assign(ac, start).markGiven(SessionRef(1, 1)))
+        assertThrows(NoSuchElementException::class.java) { treatments.save(ghost) }
+        assertEquals(0, db.treatmentDao().all().size)
+        assertEquals(0, db.query("SELECT * FROM session_states", null).use { it.count })
+    }
+
+    @Test
+    fun aFailedSaveRollsBackAndKeepsThePreviousState() {
+        val patient = patients.add(Patient("Alberto R.", "10234"))
+        val stored = treatments.assign(patient.id, ac.name, Treatment.assign(ac, start).markGiven(SessionRef(1, 1)))
+        val duplicated = listOf(SessionStateEntity(stored.id.value, 2, 1, true, null), SessionStateEntity(stored.id.value, 2, 1, true, null))
+        val changed = db.treatmentDao().findById(stored.id.value)!!.copy(protocolName = "otro")
+        assertThrows(SQLiteConstraintException::class.java) { db.treatmentDao().replace(changed, duplicated) }
+        val reloaded = treatments.findById(stored.id)!!
+        assertEquals(ac.name, reloaded.protocolName)
+        assertEquals(setOf(SessionRef(1, 1)), reloaded.treatment.givenSessions)
+    }
+
+    @Test
+    fun aPatientWithTreatmentsCannotBeDeleted() {
+        val patient = patients.add(Patient("Alberto R.", "10234"))
+        treatments.assign(patient.id, ac.name, Treatment.assign(ac, start))
+        assertThrows(SQLiteConstraintException::class.java) {
+            db.openHelper.writableDatabase.execSQL("DELETE FROM patients WHERE id = ${patient.id.value}")
+        }
+        assertEquals(1, patients.all().size)
+    }
+
+    @Test
+    fun deletingATreatmentRemovesItsSessionStates() {
+        val patient = patients.add(Patient("Alberto R.", "10234"))
+        val stored = treatments.assign(patient.id, ac.name, Treatment.assign(ac, start).markGiven(SessionRef(1, 1)))
+        db.openHelper.writableDatabase.execSQL("DELETE FROM treatments WHERE id = ${stored.id.value}")
+        assertEquals(0, db.query("SELECT * FROM session_states", null).use { it.count })
     }
 }

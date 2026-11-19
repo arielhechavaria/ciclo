@@ -29,6 +29,7 @@ interface PatientDao {
     @Insert
     fun insert(entity: PatientEntity): Long
 
+    /** Returns how many rows changed: 0 when the id does not exist. */
     @Update
-    fun update(entity: PatientEntity)
+    fun update(entity: PatientEntity): Int
 }
