@@ -29,6 +29,12 @@ interface PatientDao {
     @Insert
     fun insert(entity: PatientEntity): Long
 
+    @Insert
+    fun insertAll(entities: List<PatientEntity>)
+
+    @Query("DELETE FROM patients")
+    fun deleteAll()
+
     /** Returns how many rows changed: 0 when the id does not exist. */
     @Update
     fun update(entity: PatientEntity): Int
